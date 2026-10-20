@@ -6,7 +6,7 @@
       <SearchX />
       <strong>404</strong>
       <span>Ta strona nie istnieje albo projekt został usunięty.</span>
-      <RouterLink class="btn btn--outline btn--sm" style="margin-top: 8px" :to="{ name: 'today' }">Przejdź do dnia</RouterLink>
+      <RouterLink class="btn btn--outline btn--sm" style="margin-top: 8px" :to="{ name: 'plan' }">Przejdź do planu</RouterLink>
     </div>
   </div>
 </template>

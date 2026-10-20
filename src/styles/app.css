@@ -121,6 +121,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* room for the scrollbar always – a long list and a short one keep the same width, nothing shifts sideways */
+  scrollbar-gutter: stable;
 }
 
 body {

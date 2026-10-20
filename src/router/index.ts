@@ -19,6 +19,18 @@ function list (path: string, name: string, title: string, view: TaskView): Route
   return { path, name, component: TaskListPage, props: { view, layout: 'list' }, meta: { title, layout: 'list' } }
 }
 
+export const PLAN_TABS = ['today', 'tomorrow', 'week', 'next-week'] as const
+
+function lastPlanTab (): string {
+  try {
+    const saved = localStorage.getItem('todo:plan')
+
+    return PLAN_TABS.includes(saved as typeof PLAN_TABS[number]) ? saved! : 'today'
+  } catch {
+    return 'today'
+  }
+}
+
 function lastCalendarMode (): 'day' | 'week' {
   try {
     return localStorage.getItem('todo:calendar') === 'week' ? 'week' : 'day'
@@ -43,7 +55,9 @@ const id = (route: RouteLocationNormalized) => Number(route.params.id)
 const router = createRouter({
   history: createWebHistory(config.basePath),
   routes: [
-    { path: '/', redirect: { name: 'today' } },
+    { path: '/', redirect: { name: 'plan' } },
+    // the plan opens on the tab used last
+    { path: '/plan', name: 'plan', redirect: () => ({ name: lastPlanTab() }) },
     list('/today', 'today', 'Dziś', { kind: 'today' }),
     list('/tomorrow', 'tomorrow', 'Jutro', { kind: 'tomorrow' }),
     list('/week', 'week', 'Ten tydzień', { kind: 'week' }),

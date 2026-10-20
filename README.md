@@ -66,10 +66,10 @@ src/
 
 Widoki:
 
-- **Dziś**, **Jutro**, **Ten tydzień**, **Przyszły tydzień** (`/today`, `/tomorrow`, `/week`, `/next-week`) – zadania
-  z tego okresu ze wszystkich projektów, pogrupowane po projektach (kolejność z panelu, przy projekcie jego kategoria,
-  na końcu „Do posortowania”). W „Dziś” i „Ten tydzień” zaległe są osobno na górze; „Ten tydzień” to dziś–niedziela.
-  Na listach jednego dnia kolumna po prawej pokazuje już tylko godzinę.
+- **Plan** (`/plan` – otwiera ostatnio używaną zakładkę) z zakładkami **Dziś**, **Jutro**, **Ten tydzień**, **Przyszły tydzień**
+  (`/today`, `/tomorrow`, `/week`, `/next-week`) – zadania z tego okresu ze wszystkich projektów, pogrupowane po projektach
+  (kolejność z panelu, przy projekcie jego kategoria, na końcu „Do posortowania”). W „Dziś” i „Ten tydzień” zaległe są osobno
+  na górze; „Ten tydzień” to dziś–niedziela. Na listach jednego dnia kolumna po prawej pokazuje już tylko godzinę.
 - **Kalendarz** (`/calendar` – otwiera ostatnio używany widok): **Dzień** (`/calendar/day/RRRR-MM-DD`) – oś godzin
   z zadaniami jako blokami (godzina + czas trwania), nad nią pasek „Cały dzień” z zadaniami bez godziny, obok zaległe;
   **Tydzień** (`/calendar/week/RRRR-MM-DD`, poniedziałek–niedziela) – te same bloki w siedmiu kolumnach, klik w nagłówek

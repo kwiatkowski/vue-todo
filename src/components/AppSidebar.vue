@@ -274,7 +274,7 @@
 
 <script lang="ts" setup>
   import type { Area, Project } from '@/types'
-  import { ArrowDown, ArrowUp, CalendarArrowUp, CalendarCheck, CalendarDays, Check, ChevronDown, CircleCheck, Copy, FolderOpen, GripVertical, Inbox, Layers, LayoutDashboard, LogOut, Moon, Pencil, Plus, Sun, Sunrise, X } from 'lucide-vue-next'
+  import { ArrowDown, ArrowUp, CalendarDays, Check, ChevronDown, CircleCheck, Copy, FolderOpen, GripVertical, Inbox, Layers, LayoutDashboard, LogOut, Moon, Pencil, Plus, Sun, X } from 'lucide-vue-next'
   import { computed, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import DropMenu from '@/components/ui/DropMenu.vue'
@@ -304,10 +304,8 @@
   const { dark, toggleTheme } = useTheme()
 
   const views = computed(() => [
-    { name: 'today', names: ['today'], title: 'Dziś', icon: Sun, count: tasks.counts.today, hot: true },
-    { name: 'tomorrow', names: ['tomorrow'], title: 'Jutro', icon: Sunrise, count: tasks.counts.tomorrow },
-    { name: 'week', names: ['week'], title: 'Ten tydzień', icon: CalendarCheck, count: tasks.counts.week, hot: true },
-    { name: 'next-week', names: ['next-week'], title: 'Przyszły tydzień', icon: CalendarArrowUp, count: tasks.counts.nextWeek },
+    // today, tomorrow and both weeks are tabs of one page; the count is today's (with the overdue)
+    { name: 'plan', names: ['today', 'tomorrow', 'week', 'next-week'], title: 'Plan', icon: Sun, count: tasks.counts.today, hot: true },
     { name: 'calendar', names: ['calendar-day', 'calendar-week'], title: 'Kalendarz', icon: CalendarDays, count: 0 },
     { name: 'inbox', names: ['inbox', 'inbox-board'], title: 'Do posortowania', icon: Inbox, count: tasks.counts.inbox, always: true },
     { name: 'all', names: ['all', 'all-board'], title: 'Wszystkie', icon: Layers, count: tasks.counts.all },

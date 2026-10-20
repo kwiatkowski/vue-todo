@@ -44,6 +44,26 @@
       </button>
     </PageHeader>
 
+    <!-- "Plan": today, tomorrow and both weeks as tabs of one page -->
+    <nav v-if="isPlan" aria-label="Plan" class="tabs">
+      <RouterLink
+        v-for="tab in planTabs"
+        :key="tab.name"
+        :aria-current="view.kind === tab.name ? 'page' : undefined"
+        class="tabs__tab"
+        :class="{ 'tabs__tab--on': view.kind === tab.name }"
+        replace
+        :to="{ name: tab.name }"
+      >
+        {{ tab.title }}
+        <span
+          v-if="tab.count"
+          class="tabs__count mono"
+          :class="{ 'tabs__count--overdue': tab.overdue }"
+        >{{ tab.count }}</span>
+      </RouterLink>
+    </nav>
+
     <div v-if="tasks.status === 'loading' || tasks.status === 'idle'">
       <div v-for="index in 4" :key="index" class="skeleton" />
     </div>
@@ -131,6 +151,7 @@
   import TaskQuickAdd from '@/components/TaskQuickAdd.vue'
   import TaskRow from '@/components/TaskRow.vue'
   import TaskSortableList from '@/components/TaskSortableList.vue'
+  import { PLAN_TABS } from '@/router'
   import { useAreasStore } from '@/stores/areas'
   import { useProjectsStore } from '@/stores/projects'
   import { useTasksStore } from '@/stores/tasks'
@@ -167,7 +188,31 @@
     return view.kind === 'area' ? projects.items.filter(item => item.areaId === view.id) : []
   })
 
+  const isPlan = computed(() => (PLAN_TABS as readonly string[]).includes(props.view.kind))
+
+  const planTabs = computed(() => [
+    { name: 'today', title: 'Dziś', count: tasks.counts.today, overdue: tasks.counts.overdue > 0 },
+    { name: 'tomorrow', title: 'Jutro', count: tasks.counts.tomorrow, overdue: false },
+    { name: 'week', title: 'Ten tydzień', count: tasks.counts.week, overdue: tasks.counts.overdue > 0 },
+    { name: 'next-week', title: 'Przyszły tydzień', count: tasks.counts.nextWeek, overdue: false },
+  ])
+
+  // "Plan" in the sidebar opens the tab used last
+  watchEffect(() => {
+    if (isPlan.value) {
+      try {
+        localStorage.setItem('todo:plan', props.view.kind)
+      } catch {
+        // private mode – the plan just opens on "Dziś"
+      }
+    }
+  })
+
   const title = computed(() => {
+    if (isPlan.value) {
+      return 'Plan'
+    }
+
     if (props.view.kind === 'project') {
       return project.value?.name ?? 'Projekt'
     }
@@ -194,7 +239,8 @@
   const subtitle = computed(() => {
     const open = list.value.open.length
 
-    if (tasks.status !== 'ready') {
+    // the plan's tabs carry the counts – and a line that comes and goes would make them jump
+    if (tasks.status !== 'ready' || isPlan.value) {
       return undefined
     }
 
@@ -212,7 +258,7 @@
   })
 
   watchEffect(() => {
-    document.title = `${title.value} · Todo`
+    document.title = isPlan.value ? `${route.meta.title} · Plan · Todo` : `${title.value} · Todo`
   })
 
   /** the days "Dziś", "Jutro", "Ten tydzień" (from today on) and "Przyszły tydzień" are about */
@@ -375,6 +421,47 @@
 </script>
 
 <style scoped>
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin: -4px 0 16px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+
+.tabs__tab {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: -1px;
+  padding: 8px 12px;
+  border-bottom: 2px solid transparent;
+  color: var(--text-2);
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.tabs__tab:hover {
+  color: var(--text);
+}
+
+.tabs__tab--on {
+  border-bottom-color: var(--text);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.tabs__count {
+  color: var(--text-3);
+  font-size: 11.5px;
+}
+
+.tabs__count--overdue {
+  color: var(--danger);
+}
+
 .add {
   margin-bottom: 12px;
 }
