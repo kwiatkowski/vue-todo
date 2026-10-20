@@ -82,6 +82,8 @@ Widoki:
 - **Duplikowanie zadania**: menu „…” → „Duplikuj…” albo przycisk w oknie zadania – otwiera się okno z kopią
   (wszystko poza historią; ukończone wraca jako „Do zrobienia”), w którym przed zapisem zmienisz projekt albo cokolwiek innego.
 - **Nazwę zadania** na liście zmienisz w miejscu: ołówek za nazwą (widoczny po najechaniu na wiersz), Enter zapisuje, Esc anuluje.
+- **Zakończone** – ukończone zadania ze wszystkich projektów, pogrupowane po dniu ukończenia. 30 dni po ukończeniu
+  trafiają do kosza WordPressa (codzienne zadanie pluginu; liczbę dni zmienia filtr `wp_plugin_todo/done_retention_days`).
 - **Kolejność zadań na listach**: najpierw zadania z terminem (dzień, godzina, priorytet), potem bez terminu z priorytetem
   (od najwyższego), na końcu bez terminu i priorytetu – te układasz sam, przeciągając wiersz (zielona linia pokazuje miejsce).
   Na tablicy kolejność w kolumnach jest w całości ręczna. Nadchodzące i kalendarz sortują po dacie i godzinie,

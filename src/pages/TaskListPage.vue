@@ -151,6 +151,7 @@
   import TaskQuickAdd from '@/components/TaskQuickAdd.vue'
   import TaskRow from '@/components/TaskRow.vue'
   import TaskSortableList from '@/components/TaskSortableList.vue'
+  import { config } from '@/config'
   import { PLAN_TABS } from '@/router'
   import { useAreasStore } from '@/stores/areas'
   import { useProjectsStore } from '@/stores/projects'
@@ -251,7 +252,9 @@
     if (props.view.kind === 'done') {
       const count = list.value.done.length
 
-      return count ? plural(count, 'ukończone zadanie', 'ukończone zadania', 'ukończonych zadań') : undefined
+      const retention = config.doneRetentionDays > 0 ? `usuwane ${config.doneRetentionDays} dni po ukończeniu` : null
+
+      return [count ? plural(count, 'ukończone zadanie', 'ukończone zadania', 'ukończonych zadań') : null, retention].filter(Boolean).join(' · ') || undefined
     }
 
     return open ? plural(open, 'otwarte zadanie', 'otwarte zadania', 'otwartych zadań') : undefined

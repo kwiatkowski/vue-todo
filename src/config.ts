@@ -12,6 +12,8 @@ export interface AppConfig {
   logoutUrl: string | null
   adminUrl: string | null
   version: string | null
+  /** finished tasks are moved to the trash this many days after; 0 = kept */
+  doneRetentionDays: number
 }
 
 declare global {
@@ -31,4 +33,5 @@ export const config: AppConfig = {
   logoutUrl: injected.logoutUrl ?? null,
   adminUrl: injected.adminUrl ?? null,
   version: injected.version ?? null,
+  doneRetentionDays: injected.doneRetentionDays ?? 30,
 }
