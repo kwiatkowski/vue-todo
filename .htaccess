@@ -1,0 +1,17 @@
+# /todo/ – built assets are served straight from web/, the source files are not reachable,
+# every other path (/todo/, /todo/project/12 …) goes to WordPress, where wp-plugin-todo
+# serves the app shell to the logged-in owner.
+
+RewriteEngine On
+RewriteBase /todo/
+
+# the shell is only useful with the config WordPress injects
+RewriteRule ^web/index\.html$ - [F]
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^web/ - [L]
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [F]
+
+RewriteRule ^ /index.php [L]
