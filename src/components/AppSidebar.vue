@@ -43,27 +43,63 @@
         @dragover="onGroupOver($event, group.area)"
         @drop.prevent="onGroupDrop($event, group.area)"
       >
+        <!-- the whole heading folds the category (the actions on the right do their own thing) -->
         <div
+          :aria-expanded="group.area ? !isCollapsed(group.area) : undefined"
+          :aria-label="group.area ? `${group.area.name} – ${isCollapsed(group.area) ? 'rozwiń' : 'zwiń'}` : undefined"
           class="side__heading"
+          :class="{ 'side__heading--toggle': group.area }"
           :draggable="group.area ? 'true' : undefined"
+          :role="group.area ? 'button' : undefined"
+          :tabindex="group.area ? 0 : undefined"
+          :title="group.area ? (isCollapsed(group.area) ? 'Rozwiń' : 'Zwiń') : undefined"
+          @click="group.area && toggleArea(group.area)"
           @dragend="dragging = null; drop = null"
           @dragstart="group.area && onAreaDragStart($event, group.area)"
+          @keydown.enter.self.prevent="group.area && toggleArea(group.area)"
+          @keydown.space.self.prevent="group.area && toggleArea(group.area)"
         >
-          <RouterLink
+          <span
+            v-if="group.area"
+            aria-hidden="true"
+            class="side__toggle"
+            :class="{ 'side__toggle--collapsed': isCollapsed(group.area) }"
+          >
+            <ChevronDown />
+          </span>
+
+          <span
             v-if="group.area"
             class="side__area"
             :class="{ 'is-active': isActive(['area', 'area-board'], group.area.id) }"
-            draggable="false"
-            :to="{ name: 'area', params: { id: group.area.id } }"
           >
             <component :is="areaIcon(group.area)" class="side__area-icon" />
             <GripVertical aria-hidden="true" class="side__area-icon side__grip" />
             {{ group.area.name }}
-          </RouterLink>
+          </span>
 
           <span v-else class="side__area side__area--plain">Bez kategorii</span>
 
+          <!-- collapsed: what its projects add up to -->
+          <span
+            v-if="group.area && isCollapsed(group.area) && summary(group.projects).total > 0"
+            class="side__count side__count--area mono"
+            :title="summaryHint(group.projects)"
+          >
+            <span
+              v-if="summary(group.projects).today > 0"
+              aria-hidden="true"
+              class="side__today"
+              :class="{ 'side__today--overdue': summary(group.projects).overdue > 0 }"
+            />
+            {{ summary(group.projects).total }}
+          </span>
+
           <DropMenu v-if="group.area" class="side__add" :label="`Kategoria ${group.area.name}`" trigger-class="btn btn--icon btn--sm side__menu">
+            <button class="menu__item" role="menuitem" type="button" @click="router.push({ name: 'area', params: { id: group.area.id } })">
+              <FolderOpen /> Otwórz kategorię
+            </button>
+
             <button class="menu__item" role="menuitem" type="button" @click="ui.editArea(group.area)">
               <Pencil /> Edytuj kategorię
             </button>
@@ -97,93 +133,95 @@
             :aria-label="group.area ? `Nowy projekt w: ${group.area.name}` : 'Nowy projekt'"
             class="btn btn--icon btn--sm side__add"
             type="button"
-            @click="ui.editProject(null, group.area?.id ?? null)"
+            @click.stop="ui.editProject(null, group.area?.id ?? null)"
           >
             <Plus />
           </button>
         </div>
 
-        <div
-          v-for="project in group.projects"
-          :key="project.id"
-          class="side__item"
-          :class="{ 'side__item--active': isActive(['project', 'project-board'], project.id) }"
-          :data-project-id="project.id"
-        >
-          <RouterLink
-            class="side__link side__link--project"
-            :class="{
-              'is-active': isActive(['project', 'project-board'], project.id),
-              'side__link--dragging': draggingProject === project.id,
-              'side__link--drop-before': projectDrop?.target?.id === project.id && !projectDrop.target.after,
-              'side__link--drop-after': projectDrop?.target?.id === project.id && projectDrop.target.after,
-            }"
-            draggable="true"
-            :to="{ name: 'project', params: { id: project.id } }"
-            @dragend="draggingProject = null; projectDrop = null"
-            @dragstart="onProjectDragStart($event, project.id)"
+        <template v-if="!group.area || !isCollapsed(group.area)">
+          <div
+            v-for="project in group.projects"
+            :key="project.id"
+            class="side__item"
+            :class="{ 'side__item--active': isActive(['project', 'project-board'], project.id) }"
+            :data-project-id="project.id"
           >
-            <span class="side__swatch" :style="{ background: project.color }" />
-            <span class="side__label">{{ project.name }}</span>
-
-            <span
-              v-if="tasks.counts.byProject.get(project.id)"
-              class="side__count mono"
-              :title="todayHint(project.id)"
+            <RouterLink
+              class="side__link side__link--project"
+              :class="{
+                'is-active': isActive(['project', 'project-board'], project.id),
+                'side__link--dragging': draggingProject === project.id,
+                'side__link--drop-before': projectDrop?.target?.id === project.id && !projectDrop.target.after,
+                'side__link--drop-after': projectDrop?.target?.id === project.id && projectDrop.target.after,
+              }"
+              draggable="true"
+              :to="{ name: 'project', params: { id: project.id } }"
+              @dragend="draggingProject = null; projectDrop = null"
+              @dragstart="onProjectDragStart($event, project.id)"
             >
+              <span class="side__swatch" :style="{ background: project.color }" />
+              <span class="side__label">{{ project.name }}</span>
+
               <span
-                v-if="tasks.counts.todayByProject.get(project.id)"
-                aria-hidden="true"
-                class="side__today"
-                :class="{ 'side__today--overdue': tasks.counts.todayByProject.get(project.id)!.overdue > 0 }"
-              />
-              {{ tasks.counts.byProject.get(project.id) }}
-            </span>
-          </RouterLink>
+                v-if="tasks.counts.byProject.get(project.id)"
+                class="side__count mono"
+                :title="todayHint(project.id)"
+              >
+                <span
+                  v-if="tasks.counts.todayByProject.get(project.id)"
+                  aria-hidden="true"
+                  class="side__today"
+                  :class="{ 'side__today--overdue': tasks.counts.todayByProject.get(project.id)!.overdue > 0 }"
+                />
+                {{ tasks.counts.byProject.get(project.id) }}
+              </span>
+            </RouterLink>
 
-          <!-- on hover, in place of the count -->
-          <div class="side__actions">
-            <button
-              :aria-label="`Nowe zadanie w: ${project.name}`"
-              class="side__action"
-              title="Nowe zadanie"
-              type="button"
-              @click="ui.newTask({ projectId: project.id })"
-            >
-              <Plus />
-            </button>
+            <!-- on hover, in place of the count -->
+            <div class="side__actions">
+              <button
+                :aria-label="`Nowe zadanie w: ${project.name}`"
+                class="side__action"
+                title="Nowe zadanie"
+                type="button"
+                @click="ui.newTask({ projectId: project.id })"
+              >
+                <Plus />
+              </button>
 
-            <button
-              :aria-label="`Kopiuj projekt: ${project.name}`"
-              class="side__action"
-              title="Kopiuj projekt"
-              type="button"
-              @click="ui.copyProject(project)"
-            >
-              <Copy />
-            </button>
+              <button
+                :aria-label="`Kopiuj projekt: ${project.name}`"
+                class="side__action"
+                title="Kopiuj projekt"
+                type="button"
+                @click="ui.copyProject(project)"
+              >
+                <Copy />
+              </button>
 
-            <button
-              :aria-label="`Edytuj projekt: ${project.name}`"
-              class="side__action"
-              title="Edytuj projekt"
-              type="button"
-              @click="ui.editProject(project)"
-            >
-              <Pencil />
-            </button>
+              <button
+                :aria-label="`Edytuj projekt: ${project.name}`"
+                class="side__action"
+                title="Edytuj projekt"
+                type="button"
+                @click="ui.editProject(project)"
+              >
+                <Pencil />
+              </button>
+            </div>
           </div>
-        </div>
 
-        <button
-          v-if="group.projects.length === 0"
-          class="side__link side__link--ghost"
-          type="button"
-          @click="ui.editProject(null, group.area?.id ?? null)"
-        >
-          <span class="side__swatch side__swatch--empty" />
-          <span class="side__label">Dodaj projekt</span>
-        </button>
+          <button
+            v-if="group.projects.length === 0"
+            class="side__link side__link--ghost"
+            type="button"
+            @click="ui.editProject(null, group.area?.id ?? null)"
+          >
+            <span class="side__swatch side__swatch--empty" />
+            <span class="side__label">Dodaj projekt</span>
+          </button>
+        </template>
       </section>
 
       <button class="side__link side__link--ghost side__new-area" type="button" @click="ui.editArea()">
@@ -235,10 +273,10 @@
 </template>
 
 <script lang="ts" setup>
-  import type { Area } from '@/types'
-  import { ArrowDown, ArrowUp, CalendarArrowUp, CalendarCheck, CalendarDays, Check, CircleCheck, Copy, GripVertical, Inbox, Layers, LayoutDashboard, LogOut, Moon, Pencil, Plus, Sun, Sunrise, X } from 'lucide-vue-next'
+  import type { Area, Project } from '@/types'
+  import { ArrowDown, ArrowUp, CalendarArrowUp, CalendarCheck, CalendarDays, Check, ChevronDown, CircleCheck, Copy, FolderOpen, GripVertical, Inbox, Layers, LayoutDashboard, LogOut, Moon, Pencil, Plus, Sun, Sunrise, X } from 'lucide-vue-next'
   import { computed, ref } from 'vue'
-  import { useRoute } from 'vue-router'
+  import { useRoute, useRouter } from 'vue-router'
   import DropMenu from '@/components/ui/DropMenu.vue'
   import { useTheme } from '@/composables/theme'
   import { config } from '@/config'
@@ -250,6 +288,7 @@
   import { dropTarget, getDragArea, getDragProject, isAreaDrag, isProjectDrag, setDragArea, setDragProject } from '@/utils/drag'
 
   const route = useRoute()
+  const router = useRouter()
   const projects = useProjectsStore()
   const tasks = useTasksStore()
   const ui = useUiStore()
@@ -335,6 +374,70 @@
   }
 
   /** "Na dziś: 2 (w tym zaległe: 1)" – the dot's explanation */
+  /* ---------- collapsing categories – remembered in this browser ---------- */
+
+  const COLLAPSED_KEY = 'todo:collapsed-areas'
+
+  const collapsed = ref<Set<number>>(readCollapsed())
+
+  function readCollapsed (): Set<number> {
+    try {
+      const saved = JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? '[]')
+
+      return new Set(Array.isArray(saved) ? saved.filter(item => Number.isInteger(item)) : [])
+    } catch {
+      return new Set()
+    }
+  }
+
+  function isCollapsed (area: Area): boolean {
+    return collapsed.value.has(area.id)
+  }
+
+  function toggleArea (area: Area): void {
+    const next = new Set(collapsed.value)
+
+    if (next.has(area.id)) {
+      next.delete(area.id)
+    } else {
+      next.add(area.id)
+    }
+
+    collapsed.value = next
+
+    try {
+      localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next]))
+    } catch {
+      // private mode – it just won't be remembered
+    }
+  }
+
+  /** A collapsed category's projects added up: open tasks, and of those due today (incl. overdue) and overdue. */
+  function summary (items: Project[]): { total: number, today: number, overdue: number } {
+    let total = 0
+    let dueToday = 0
+    let overdue = 0
+
+    for (const project of items) {
+      total += tasks.counts.byProject.get(project.id) ?? 0
+      dueToday += tasks.counts.todayByProject.get(project.id)?.today ?? 0
+      overdue += tasks.counts.todayByProject.get(project.id)?.overdue ?? 0
+    }
+
+    return { total, today: dueToday, overdue }
+  }
+
+  function summaryHint (items: Project[]): string {
+    const { total, today: dueToday, overdue } = summary(items)
+    const parts = [`Otwarte: ${total}`]
+
+    if (dueToday > 0) {
+      parts.push(`na dziś: ${dueToday}${overdue > 0 ? ` (w tym zaległe: ${overdue})` : ''}`)
+    }
+
+    return parts.join(' · ')
+  }
+
   function todayHint (projectId: number): string | undefined {
     const entry = tasks.counts.todayByProject.get(projectId)
 
@@ -462,9 +565,57 @@
   color: var(--text-3);
 }
 
-a.side__area:hover,
 .side__area.is-active {
   color: var(--text);
+}
+
+.side__toggle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-left: -6px;
+  margin-right: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+}
+
+.side__toggle svg {
+  width: 13px;
+  height: 13px;
+  transition: transform .15s;
+}
+
+.side__toggle--collapsed svg {
+  transform: rotate(-90deg);
+}
+
+.side__heading.side__heading--toggle {
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.side__heading--toggle:hover {
+  background: var(--hover);
+}
+
+.side__heading--toggle:hover .side__toggle,
+.side__heading--toggle:hover .side__area {
+  color: var(--text);
+}
+
+/* collapsed category: the sum of its projects, where a project's count would be */
+.side__count--area {
+  margin-right: 6px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .side__area-icon {
@@ -476,10 +627,6 @@ a.side__area:hover,
 /* the category icon turns into a grip on hover – the heading is the drag handle */
 .side__grip {
   display: none;
-}
-
-.side__heading[draggable='true'] {
-  cursor: grab;
 }
 
 @media (hover: hover) {
@@ -526,14 +673,15 @@ a.side__area:hover,
   transition: opacity .1s;
 }
 
+/* hover, or keyboard focus – not the focus a click leaves behind, or the count would stay hidden after it */
 .side__item:hover .side__actions,
-.side__actions:focus-within {
+.side__item:has(:focus-visible) .side__actions {
   opacity: 1;
   pointer-events: auto;
 }
 
 .side__item:hover .side__count,
-.side__item:focus-within .side__count {
+.side__item:has(:focus-visible) .side__count {
   visibility: hidden;
 }
 
@@ -554,7 +702,7 @@ a.side__area:hover,
 
 /* the name makes room for the three actions and ends in "…" instead of running under them */
 .side__item:hover .side__link,
-.side__item:focus-within .side__link {
+.side__item:has(:focus-visible) .side__link {
   padding-right: 84px;
 }
 
@@ -637,8 +785,37 @@ a.side__area:hover,
 }
 
 .side__heading:hover .side__add,
-.side__add:focus-visible {
+.side__heading:focus-visible .side__add,
+.side__heading:has(:focus-visible) .side__add {
   opacity: 1;
+}
+
+/* with a mouse the "…" and "+" float over the right edge on hover, so a collapsed category's sum
+   lines up with the projects' counts; on touch they stay in the row, always visible */
+@media (hover: hover) {
+  .side__heading {
+    position: relative;
+  }
+
+  .side__heading > .side__add {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+  }
+
+  .side__heading > .side__add.menu {
+    right: 32px;
+  }
+
+  .side__count--area {
+    margin-right: 8px;
+  }
+
+  .side__heading:hover .side__count--area,
+  .side__heading:focus-visible .side__count--area,
+  .side__heading:has(:focus-visible) .side__count--area {
+    visibility: hidden;
+  }
 }
 
 @media (hover: none) {
