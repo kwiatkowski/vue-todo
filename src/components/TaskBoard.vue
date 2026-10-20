@@ -250,8 +250,8 @@
   .board {
     grid-template-columns: repeat(3, minmax(78vw, 1fr));
     scroll-snap-type: x mandatory;
-    margin-inline: -16px;
-    padding-inline: 16px;
+    margin-inline: calc(-1 * var(--edge));
+    padding-inline: var(--edge);
   }
 
   .col {

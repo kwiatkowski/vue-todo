@@ -294,7 +294,7 @@
 
 .calendar__grid {
   position: sticky;
-  top: 16px;
+  top: var(--edge);
   height: calc(100dvh - 160px);
   min-height: 420px;
 }

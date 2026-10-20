@@ -47,7 +47,7 @@
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 12px 16px;
-  padding: 36px 0 20px;
+  padding: var(--edge) 0 20px;
 }
 
 .head__menu {
@@ -102,10 +102,6 @@
 }
 
 @media (max-width: 900px) {
-  .head {
-    padding-top: 16px;
-  }
-
   .head {
     align-items: center;
   }

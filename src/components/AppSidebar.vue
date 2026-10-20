@@ -503,7 +503,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px 16px 14px 18px;
+  padding: var(--edge) 16px 14px var(--edge);
 }
 
 .side__logo {
@@ -534,7 +534,8 @@
 .side__scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 0 10px 16px;
+  /* + the links' own 8px = the same --edge as the page */
+  padding: 0 calc(var(--edge) - 8px) 16px;
 }
 
 .side__group {

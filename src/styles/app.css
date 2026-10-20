@@ -44,6 +44,8 @@
   --radius-lg: 12px;
 
   --sidebar: 268px;
+  /* the inset of content from the edges – the sidebar's and the page's alike */
+  --edge: 18px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -511,13 +513,7 @@ select.input {
 
 .page {
   width: 100%;
-  padding: 0 32px 96px;
-}
-
-@media (max-width: 600px) {
-  .page {
-    padding-inline: 16px;
-  }
+  padding: 0 var(--edge) 96px;
 }
 
 .empty {
