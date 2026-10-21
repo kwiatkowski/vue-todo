@@ -57,11 +57,17 @@ export function compareAuto (a: Task, b: Task): number {
     || compareManual(a, b)
 }
 
-/** Splits a list into the self-ordering part (sorted) and the hand-ordered rest (in manual order). */
+/**
+ * Splits a list into the self-ordering part (sorted) and the hand-ordered rest (in manual order).
+ * Tasks in progress lead the list – whatever their date or priority, they are what's being worked on.
+ */
 export function splitByOrder (tasks: Task[]): { auto: Task[], manual: Task[] } {
+  const doing = tasks.filter(task => task.status === 'doing').toSorted(compareAuto)
+  const rest = tasks.filter(task => task.status !== 'doing')
+
   return {
-    auto: tasks.filter(task => isAutoSorted(task)).toSorted(compareAuto),
-    manual: tasks.filter(task => !isAutoSorted(task)).toSorted(compareManual),
+    auto: [...doing, ...rest.filter(task => isAutoSorted(task)).toSorted(compareAuto)],
+    manual: rest.filter(task => !isAutoSorted(task)).toSorted(compareManual),
   }
 }
 

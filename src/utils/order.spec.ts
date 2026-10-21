@@ -75,6 +75,20 @@ describe('splitByOrder', () => {
     expect(auto.map(item => item.id)).toEqual([4, 7, 6, 3, 8, 2])
     expect(manual.map(item => item.id)).toEqual([5, 1])
   })
+
+  it('puts tasks in progress first, even without a date or priority', () => {
+    const list = [
+      task(1, 10, undefined, { due: '2026-10-18', priority: 'high' }),
+      task(2, 20, undefined, { status: 'doing' }), // nothing else – would be hand-ordered
+      task(3, 30, undefined, { status: 'doing', due: '2026-10-25' }),
+      task(4, 40),
+    ]
+
+    const { auto, manual } = splitByOrder(list)
+
+    expect(auto.map(item => item.id)).toEqual([3, 2, 1])
+    expect(manual.map(item => item.id)).toEqual([4])
+  })
 })
 
 describe('duplicateOf', () => {

@@ -1,7 +1,7 @@
 <template>
   <div
     class="row"
-    :class="{ 'row--done': task.done, 'row--pending': task.id < 0 }"
+    :class="{ 'row--done': task.done, 'row--doing': task.status === 'doing', 'row--pending': task.id < 0 }"
     :draggable="draggable && task.id > 0 && !renaming"
     @click="ui.editTask(task)"
     @dragend="endDragTask"
@@ -163,6 +163,22 @@
 
 .row__title {
   overflow-wrap: anywhere;
+}
+
+/* in progress: a soft accent band – what's being worked on stands out */
+.row--doing {
+  margin-block: 2px;
+  border-bottom-color: transparent;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
+.row--doing:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.row--doing .row__title {
+  font-weight: 550;
 }
 
 .row__project {
