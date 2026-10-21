@@ -14,4 +14,7 @@
 <script lang="ts" setup>
   import { SearchX } from 'lucide-vue-next'
   import PageHeader from '@/components/PageHeader.vue'
+  import { setPageTitle } from '@/composables/tabBadge'
+
+  setPageTitle('Nie znaleziono · Todo')
 </script>

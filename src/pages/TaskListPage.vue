@@ -151,6 +151,7 @@
   import TaskQuickAdd from '@/components/TaskQuickAdd.vue'
   import TaskRow from '@/components/TaskRow.vue'
   import TaskSortableList from '@/components/TaskSortableList.vue'
+  import { setPageTitle } from '@/composables/tabBadge'
   import { config } from '@/config'
   import { PLAN_TABS } from '@/router'
   import { useAreasStore } from '@/stores/areas'
@@ -261,7 +262,7 @@
   })
 
   watchEffect(() => {
-    document.title = isPlan.value ? `${route.meta.title} · Plan · Todo` : `${title.value} · Todo`
+    setPageTitle(isPlan.value ? `${route.meta.title} · Plan · Todo` : `${title.value} · Todo`)
   })
 
   /** the days "Dziś", "Jutro", "Ten tydzień" (from today on) and "Przyszły tydzień" are about */

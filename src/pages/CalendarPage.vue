@@ -112,6 +112,7 @@
   import PageHeader from '@/components/PageHeader.vue'
   import TaskQuickAdd from '@/components/TaskQuickAdd.vue'
   import TaskRow from '@/components/TaskRow.vue'
+  import { setPageTitle } from '@/composables/tabBadge'
   import { useTasksStore } from '@/stores/tasks'
   import { useUiStore } from '@/stores/ui'
   import { addDays, formatDue, formatLongDay, formatWeekRange, isIsoDay, startOfWeek, today, weekDays } from '@/utils/date'
@@ -172,7 +173,7 @@
   })
 
   watchEffect(() => {
-    document.title = `${props.mode === 'day' && day.value === today() ? 'Dziś' : title.value} · Kalendarz · Todo`
+    setPageTitle(`${props.mode === 'day' && day.value === today() ? 'Dziś' : title.value} · Kalendarz · Todo`)
   })
 
   /** The week's own address is its Monday – every day of it lands on the same URL. */

@@ -24,6 +24,7 @@
   import ProjectDialog from '@/components/ProjectDialog.vue'
   import TaskDialog from '@/components/TaskDialog.vue'
   import ToastHost from '@/components/ui/ToastHost.vue'
+  import { useTabBadge } from '@/composables/tabBadge'
   import { useAreasStore } from '@/stores/areas'
   import { useProjectsStore } from '@/stores/projects'
   import { useTasksStore } from '@/stores/tasks'
@@ -34,6 +35,12 @@
   const tasks = useTasksStore()
   const projects = useProjectsStore()
   const areas = useAreasStore()
+
+  // the browser tab counts what's due today (overdue included) – once the tasks are in
+  useTabBadge(() => ({
+    count: tasks.status === 'ready' ? tasks.counts.today : 0,
+    overdue: tasks.counts.overdue > 0,
+  }))
 
   // the mobile sidebar closes once you pick something
   watch(() => route.fullPath, () => {
