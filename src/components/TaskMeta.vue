@@ -6,7 +6,7 @@
 
     <span v-if="task.due && showDue && !dueAside" class="chip mono" :class="dueClass">
       <CalendarDays />
-      {{ formatDue(task.due) }}<template v-if="task.time">, {{ formatRange(task.time, task.duration) }}</template>
+      {{ task.start ? formatSpan(task.start, task.due) : formatDue(task.due) }}<template v-if="task.time">, {{ formatRange(task.time, task.duration) }}</template>
     </span>
 
     <span v-else-if="task.time && !showDue && !dueAside" class="chip chip--soft mono">
@@ -32,9 +32,9 @@
   import { AlignLeft, CalendarDays, CircleDashed, Clock, Flag } from 'lucide-vue-next'
   import { computed } from 'vue'
   import { useProjectsStore } from '@/stores/projects'
-  import { formatDue, today } from '@/utils/date'
+  import { formatDue, formatSpan, today } from '@/utils/date'
   import { formatRange } from '@/utils/day'
-  import { isOverdue, priorityTitle } from '@/utils/tasks'
+  import { isOverdue, occursOn, priorityTitle } from '@/utils/tasks'
 
   const props = withDefaults(defineProps<{
     task: Task
@@ -53,7 +53,7 @@
       return 'chip--danger'
     }
 
-    return props.task.due === today() && !props.task.done ? 'chip--accent' : 'chip--soft'
+    return occursOn(props.task, today()) && !props.task.done ? 'chip--accent' : 'chip--soft'
   })
 
   const visible = computed(() => props.task.status === 'doing'

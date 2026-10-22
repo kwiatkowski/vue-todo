@@ -52,20 +52,57 @@
           </optgroup>
         </select>
 
-        <label class="props__label" for="task-due">Termin</label>
+        <label class="props__label" for="task-from">Od</label>
 
         <div class="props__inline">
-          <input id="task-due" v-model="dueModel" class="input mono" type="date">
-          <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.due === day }" type="button" @click="form.due = day">Dziś</button>
-          <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.due === tomorrow }" type="button" @click="form.due = tomorrow">Jutro</button>
+          <input id="task-from" v-model="fromModel" class="input mono" type="date">
+          <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.from === day }" type="button" @click="form.from = day">Dziś</button>
+          <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.from === tomorrow }" type="button" @click="form.from = tomorrow">Jutro</button>
 
           <button
-            v-if="form.due"
+            v-if="form.from"
             aria-label="Bez terminu"
             class="btn btn--icon btn--sm"
             title="Bez terminu"
             type="button"
-            @click="form.due = null"
+            @click="form.from = null"
+          >
+            <X />
+          </button>
+        </div>
+
+        <label class="props__label" for="task-to">Do</label>
+
+        <div class="props__inline">
+          <input
+            id="task-to"
+            v-model="toModel"
+            class="input mono"
+            :disabled="!form.from"
+            :min="form.from ? addDays(form.from, 1) : undefined"
+            :title="form.from ? 'Ostatni dzień – zadanie będzie widoczne każdego dnia od pierwszego' : 'Najpierw wybierz dzień'"
+            type="date"
+          >
+
+          <input
+            v-model.number="daysModel"
+            aria-label="Liczba dni"
+            class="input mono props__days"
+            :disabled="!form.from"
+            min="1"
+            title="Liczba dni"
+            type="number"
+          >
+
+          <span class="props__hint">{{ daysModel === 1 ? 'dzień' : 'dni' }}</span>
+
+          <button
+            v-if="form.to"
+            aria-label="Jeden dzień"
+            class="btn btn--icon btn--sm"
+            title="Jeden dzień"
+            type="button"
+            @click="form.to = null"
           >
             <X />
           </button>
@@ -78,9 +115,9 @@
             id="task-time"
             v-model="timeModel"
             class="input mono"
-            :disabled="!form.due"
+            :disabled="!form.from || !!form.to"
             step="300"
-            :title="form.due ? undefined : 'Najpierw wybierz termin'"
+            :title="form.to ? 'Zadanie na kilka dni trwa całe dni' : (form.from ? undefined : 'Najpierw wybierz dzień')"
             type="time"
           >
 
@@ -152,7 +189,7 @@
   import { useProjectsStore } from '@/stores/projects'
   import { useTasksStore } from '@/stores/tasks'
   import { useUiStore } from '@/stores/ui'
-  import { addDays, today } from '@/utils/date'
+  import { addDays, spanLength, today } from '@/utils/date'
   import { DEFAULT_DURATION, DURATIONS, formatDuration } from '@/utils/day'
   import { STATUS_ICONS } from '@/utils/icons'
   import { PRIORITIES, STATUSES } from '@/utils/tasks'
@@ -163,7 +200,10 @@
     status: Status
     projectId: number | null
     priority: Priority
-    due: string | null
+    /** the day – the first one when the task spans several */
+    from: string | null
+    /** the last day of a task spanning several, after `from`; null = just the one day */
+    to: string | null
     time: string | null
     duration: number | null
   }
@@ -194,9 +234,24 @@
   })
 
   // native inputs give '' for empty
-  const dueModel = computed({
-    get: () => form.value?.due ?? '',
-    set: value => form.value && (form.value.due = value || null),
+  const fromModel = computed({
+    get: () => form.value?.from ?? '',
+    set: value => form.value && (form.value.from = value || null),
+  })
+
+  const toModel = computed({
+    get: () => form.value?.to ?? '',
+    set: value => form.value && (form.value.to = value || null),
+  })
+
+  /** "Do" as a number of days – typing 3 sets the last day two days after the first */
+  const daysModel = computed({
+    get: () => form.value?.from && form.value.to ? spanLength(form.value.from, form.value.to) : 1,
+    set: value => {
+      if (form.value?.from && Number.isInteger(value) && value >= 1) {
+        form.value.to = value > 1 ? addDays(form.value.from, value - 1) : null
+      }
+    },
   })
 
   const timeModel = computed({
@@ -229,16 +284,28 @@
       status: initial.status ?? 'todo',
       projectId: initial.projectId ?? null,
       priority: initial.priority ?? 'none',
-      due: initial.due ?? null,
+      from: initial.start ?? initial.due ?? null,
+      to: initial.start ? (initial.due ?? null) : null,
       time: initial.time ?? null,
       duration: initial.duration ?? null,
     }
     titleError.value = false
   })
 
-  // no time without a day, no duration without a time
-  watch(() => form.value?.due, due => {
-    if (form.value && !due) {
+  // no time without a day, no duration without a time; the last day only after the first
+  watch(() => form.value?.from, from => {
+    if (form.value && !from) {
+      form.value.time = null
+    }
+
+    if (form.value?.to && (!from || form.value.to <= from)) {
+      form.value.to = null
+    }
+  })
+
+  // several days are whole days
+  watch(() => form.value?.to, to => {
+    if (form.value && to) {
       form.value.time = null
     }
   })
@@ -260,7 +327,8 @@
       return
     }
 
-    const data = { ...form.value, title: form.value.title.trim(), notes: form.value.notes.trim() }
+    const { from, to, ...fields } = form.value
+    const data = { ...fields, title: fields.title.trim(), notes: fields.notes.trim(), start: to ? from : null, due: to ?? from }
 
     if (!data.title) {
       titleError.value = true
@@ -339,6 +407,18 @@
 .props__inline .input {
   flex: 1;
   min-width: 0;
+}
+
+.props__inline .props__days {
+  flex: 0 0 64px;
+  text-align: right;
+}
+
+.props__hint {
+  flex: none;
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .props .seg {

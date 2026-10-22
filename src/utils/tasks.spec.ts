@@ -1,6 +1,6 @@
 import type { Task } from '@/types'
 import { describe, expect, it } from 'vitest'
-import { formatDue, formatDueParts, formatWeekRange, startOfWeek, weekDays } from './date'
+import { formatDue, formatDueParts, formatSpan, formatWeekRange, spanLength, startOfWeek, weekDays } from './date'
 import { compareOpen, inView, isOverdue } from './tasks'
 
 function task (overrides: Partial<Task> = {}): Task {
@@ -11,6 +11,7 @@ function task (overrides: Partial<Task> = {}): Task {
     done: false,
     status: 'todo',
     completedAt: null,
+    start: null,
     due: null,
     time: null,
     duration: null,
@@ -62,6 +63,25 @@ describe('inView', () => {
   it('shows only finished tasks in "done"', () => {
     expect(inView(task({ done: true, status: 'done' }), { kind: 'done' }, DAY)).toBe(true)
     expect(inView(task(), { kind: 'done' }, DAY)).toBe(false)
+  })
+
+  it('shows a task spanning days on each of them', () => {
+    // DAY is Friday 2026-10-16
+    const span = task({ start: '2026-10-16', due: '2026-10-19' }) // Fri – Mon
+    expect(inView(span, { kind: 'today' }, DAY)).toBe(true)
+    expect(inView(span, { kind: 'tomorrow' }, DAY)).toBe(true)
+    expect(inView(span, { kind: 'week' }, DAY)).toBe(true)
+    expect(inView(span, { kind: 'next-week' }, DAY)).toBe(true) // ends on Monday the 19th
+
+    const later = task({ start: '2026-10-18', due: '2026-10-20' }) // Sun – Tue
+    expect(inView(later, { kind: 'today' }, DAY)).toBe(false)
+    expect(inView(later, { kind: 'tomorrow' }, DAY)).toBe(false)
+    expect(inView(later, { kind: 'week' }, DAY)).toBe(true)
+
+    const running = task({ start: '2026-10-14', due: '2026-10-17' }) // started on Wednesday
+    expect(inView(running, { kind: 'today' }, DAY)).toBe(true)
+    expect(isOverdue(running, DAY)).toBe(false)
+    expect(inView(task({ start: '2026-10-14', due: '2026-10-16', done: true, status: 'done' }), { kind: 'today' }, DAY)).toBe(true)
   })
 
   it('shows only the next day in "tomorrow"', () => {
@@ -151,5 +171,20 @@ describe('weeks', () => {
   it('names the range, across months too', () => {
     expect(formatWeekRange('2026-10-16')).toBe('12–18 października 2026')
     expect(formatWeekRange('2026-10-28')).toBe('26 października – 1 listopada 2026')
+  })
+})
+
+describe('spans', () => {
+  const now = new Date(2026, 9, 16, 12)
+
+  it('formats a span of days', () => {
+    expect(formatSpan('2026-10-20', '2026-10-24', now)).toBe('20–24 paź')
+    expect(formatSpan('2026-10-30', '2026-11-02', now)).toBe('30 paź – 2 lis')
+    expect(formatSpan('2026-12-30', '2027-01-02', now)).toBe('30 gru 2026 – 2 sty 2027')
+  })
+
+  it('counts the days of a span', () => {
+    expect(spanLength('2026-10-20', '2026-10-24')).toBe(5)
+    expect(spanLength('2026-10-25', '2026-10-26')).toBe(2) // across the DST change
   })
 })

@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
 import { tasksApi } from '@/api/todo'
 import { addDays, startOfWeek, today } from '@/utils/date'
 import { compareManual } from '@/utils/order'
-import { compareByDue, compareDone, compareOpen, inView, statusChange } from '@/utils/tasks'
+import { compareByDue, compareDone, compareOpen, firstDay, inView, occursOn, overlaps, statusChange } from '@/utils/tasks'
 import { useNotifyStore } from './notify'
 import { useProjectsStore } from './projects'
 
@@ -57,26 +57,33 @@ export const useTasksStore = defineStore('tasks', () => {
         byProject.set(task.projectId, (byProject.get(task.projectId) ?? 0) + 1)
       }
 
-      if (task.due !== null && task.due <= day) {
+      // a task spanning several days counts on each tab it touches – the same as inView()
+      const first = firstDay(task)
+
+      if (first !== null && first <= day) {
         dueToday++
 
-        if (task.due < day) {
+        if (task.due! < day) {
           overdue++
         }
 
         if (task.projectId !== null) {
           const entry = todayByProject.get(task.projectId) ?? { today: 0, overdue: 0 }
           entry.today++
-          entry.overdue += task.due < day ? 1 : 0
+          entry.overdue += task.due! < day ? 1 : 0
           todayByProject.set(task.projectId, entry)
         }
-      } else if (task.due === tomorrow) {
+      }
+
+      if (occursOn(task, tomorrow)) {
         dueTomorrow++
       }
 
-      if (task.due !== null && task.due <= sunday) {
+      if (first !== null && first <= sunday) {
         dueWeek++
-      } else if (task.due !== null && task.due <= nextSunday) {
+      }
+
+      if (overlaps(task, addDays(sunday, 1), nextSunday)) {
         dueNextWeek++
       }
     }
@@ -101,7 +108,7 @@ export const useTasksStore = defineStore('tasks', () => {
     const isToday = day === today()
 
     for (const task of items.value) {
-      if (task.due === day) {
+      if (occursOn(task, day)) {
         if (task.time === null) {
           (task.done ? plan.done : plan.untimed).push(task)
         } else {
@@ -142,6 +149,7 @@ export const useTasksStore = defineStore('tasks', () => {
       done,
       status: input.status ?? 'todo',
       completedAt: done ? now : null,
+      start: input.start ?? null,
       due: input.due ?? null,
       time: input.time ?? null,
       duration: input.duration ?? null,
@@ -172,6 +180,7 @@ export const useTasksStore = defineStore('tasks', () => {
     const before = { ...task }
 
     Object.assign(task, normalize(changes))
+    normalizeSpan(task)
 
     if (task.done !== before.done) {
       task.completedAt = task.done ? new Date().toISOString() : null
@@ -264,9 +273,22 @@ function normalize (changes: TaskInput): TaskInput {
   }
 
   if ('due' in result && !result.due) {
+    result.start = null
     result.time = null
     result.duration = null
   }
 
   return result
+}
+
+/** As on the server: a start only before the due day, and a task spanning days has no time. */
+function normalizeSpan (task: Task): void {
+  if (task.start !== null && (task.due === null || task.start >= task.due)) {
+    task.start = null
+  }
+
+  if (task.start !== null) {
+    task.time = null
+    task.duration = null
+  }
 }

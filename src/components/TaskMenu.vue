@@ -9,21 +9,21 @@
     </button>
 
     <button
-      v-if="!task.done && task.due !== day"
+      v-if="!task.done && (task.due !== day || task.start)"
       class="menu__item"
       role="menuitem"
       type="button"
-      @click="tasks.update(task.id, { due: day })"
+      @click="tasks.update(task.id, { start: null, due: day })"
     >
       <Sun /> Na dziś
     </button>
 
     <button
-      v-if="!task.done && task.due !== tomorrow"
+      v-if="!task.done && (task.due !== tomorrow || task.start)"
       class="menu__item"
       role="menuitem"
       type="button"
-      @click="tasks.update(task.id, { due: tomorrow })"
+      @click="tasks.update(task.id, { start: null, due: tomorrow })"
     >
       <Sunrise /> Na jutro
     </button>

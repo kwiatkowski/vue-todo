@@ -32,7 +32,9 @@ export interface Task {
   status: Status
   /** ISO 8601 (UTC) */
   completedAt: string | null
-  /** day, YYYY-MM-DD */
+  /** first day of a task spanning several days, YYYY-MM-DD; null = only on `due` */
+  start: string | null
+  /** day, YYYY-MM-DD – the last one when the task spans several */
   due: string | null
   /** start on the due day, HH:MM */
   time: string | null
@@ -48,7 +50,7 @@ export interface Task {
   updatedAt: string
 }
 
-export type TaskInput = Partial<Pick<Task, 'title' | 'notes' | 'done' | 'status' | 'due' | 'time' | 'duration' | 'priority' | 'projectId' | 'position'>>
+export type TaskInput = Partial<Pick<Task, 'title' | 'notes' | 'done' | 'status' | 'start' | 'due' | 'time' | 'duration' | 'priority' | 'projectId' | 'position'>>
 
 export type ProjectInput = Partial<Pick<Project, 'name' | 'color' | 'areaId'>>
 

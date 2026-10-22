@@ -109,6 +109,27 @@ export function formatDueParts (iso: string, now = new Date()): { day: string, d
   return { day: short, date: null }
 }
 
+/** "20–24 paź", "30 paź – 2 lis", with the year outside the current one – a task spanning several days. */
+export function formatSpan (start: string, end: string, now = new Date()): string {
+  const first = parseIsoDay(start)
+  const last = parseIsoDay(end)
+  const sameYear = first.getFullYear() === last.getFullYear()
+  const right = last.getFullYear() === now.getFullYear() ? dayMonth.format(last) : dayMonthYear.format(last)
+
+  if (sameYear && first.getMonth() === last.getMonth()) {
+    return `${first.getDate()}–${right}`
+  }
+
+  const left = sameYear && first.getFullYear() === now.getFullYear() ? dayMonth.format(first) : dayMonthYear.format(first)
+
+  return `${left} – ${right}`
+}
+
+/** Days from `start` to `end`, both included. */
+export function spanLength (start: string, end: string): number {
+  return Math.round((parseIsoDay(end).getTime() - parseIsoDay(start).getTime()) / DAY_MS) + 1
+}
+
 /** Monday of the week `iso` is in – Polish weeks start on Monday. */
 export function startOfWeek (iso: string): string {
   const weekday = (parseIsoDay(iso).getDay() + 6) % 7 // Monday 0 … Sunday 6

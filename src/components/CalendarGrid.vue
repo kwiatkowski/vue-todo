@@ -43,10 +43,10 @@
             :class="{ 'pill--dragging': draggingId === task.id, 'pill--done': task.done }"
             :draggable="task.id > 0"
             :style="{ '--c': projects.byId(task.projectId)?.color ?? 'var(--text-3)' }"
-            :title="task.title"
+            :title="task.start ? `${task.title} · ${formatSpan(task.start, task.due!)}` : task.title"
             @click="ui.editTask(task)"
             @dragend="onPillDragEnd"
-            @dragstart="onPillDragStart($event, task)"
+            @dragstart="onPillDragStart($event, task, column.day)"
           >
             <TaskCheck class="pill__check" :task="task" />
             <span class="pill__title">{{ task.title }}</span>
@@ -141,7 +141,7 @@
   import { useProjectsStore } from '@/stores/projects'
   import { useTasksStore } from '@/stores/tasks'
   import { useUiStore } from '@/stores/ui'
-  import { formatLongDay, formatShortWeekday, parseIsoDay, today } from '@/utils/date'
+  import { addDays, formatLongDay, formatShortWeekday, formatSpan, parseIsoDay, spanLength, today } from '@/utils/date'
   import { formatRange, fromMinutes, layoutDay, snap } from '@/utils/day'
   import { endDragTask, getDragTask, isTaskDrag, setDragTask } from '@/utils/drag'
 
@@ -180,6 +180,8 @@
   const resizing = ref<{ id: number, duration: number } | null>(null)
   /** where in the block it was grabbed, so it doesn't jump to the cursor */
   let grabOffset = 0
+  /** the day a pill was picked up on – a task spanning days moves by the distance from it */
+  let grabDay: string | null = null
 
   const week = computed(() => props.columns.length > 1)
   const todayIso = computed(() => today(now.value))
@@ -276,19 +278,22 @@
     draggingId.value = null
     grabOffset = 0
 
+    // onto the timeline it becomes a one-day task at that hour
     if (id !== null && target) {
-      void store.update(id, { due: target.day, time: fromMinutes(target.minutes) })
+      void store.update(id, { start: null, due: target.day, time: fromMinutes(target.minutes) })
     }
   }
 
-  function onPillDragStart (event: DragEvent, task: Task): void {
+  function onPillDragStart (event: DragEvent, task: Task, day: string): void {
     setDragTask(event, task.id)
+    grabDay = day
     draggingId.value = task.id
     grabOffset = 0 // lands where the pointer is
   }
 
   function onPillDragEnd (): void {
     draggingId.value = null
+    grabDay = null
     endDragTask()
   }
 
@@ -310,9 +315,26 @@
     overAllDay.value = null
     draggingId.value = null
     const id = getDragTask(event)
+    const task = id === null ? undefined : store.items.find(item => item.id === id)
+    // from a list (not a pill) a task spanning days starts on the day it's dropped on
+    const from = grabDay ?? task?.start ?? null
+    grabDay = null
 
-    if (id !== null && !column.allDay.some(task => task.id === id)) {
-      void store.update(id, { due: column.day, time: null, duration: null })
+    if (!task || (from === column.day && task.time === null)) {
+      return
+    }
+
+    // a task spanning days keeps its length, shifted by as many days as the pill moved
+    if (task.start && task.due && from) {
+      const shift = spanLength(from, column.day) - 1
+
+      void store.update(task.id, { start: addDays(task.start, shift), due: addDays(task.due, shift) })
+
+      return
+    }
+
+    if (!column.allDay.some(item => item.id === task.id)) {
+      void store.update(task.id, { due: column.day, time: null, duration: null })
     }
   }
 

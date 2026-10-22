@@ -84,6 +84,7 @@ export function duplicateOf (task: Task, all: Task[]): Omit<TaskInput, 'title'> 
     title: task.title,
     notes: task.notes,
     status: task.status === 'done' ? 'todo' : task.status,
+    start: task.start,
     due: task.due,
     time: task.time,
     duration: task.duration,

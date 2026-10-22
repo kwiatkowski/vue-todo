@@ -160,6 +160,7 @@
   import { useUiStore } from '@/stores/ui'
   import { areaIcon } from '@/utils/areaIcons'
   import { addDays, formatDue, formatLongDay, formatWeekRange, startOfWeek, today, toIsoDay } from '@/utils/date'
+  import { overlaps } from '@/utils/tasks'
 
   const props = defineProps<{ view: TaskView, layout: Layout }>()
 
@@ -357,7 +358,7 @@
       const { from, to } = range.value
       const overdue = open.filter(task => task.due! < from)
       // one day is the page's – rows then show just the time
-      const inRange = byProject(open.filter(task => task.due! >= from && task.due! <= to), { showDue: from !== to }, true)
+      const inRange = byProject(open.filter(task => overlaps(task, from, to)), { showDue: from !== to }, true)
 
       return overdue.length > 0
         ? [{ key: 'overdue', title: 'Zaległe', overdue: true, tasks: overdue }, ...inRange]

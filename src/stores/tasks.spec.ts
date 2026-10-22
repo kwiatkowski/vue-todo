@@ -23,6 +23,7 @@ function task (overrides: Partial<Task> = {}): Task {
     done: false,
     status: 'todo',
     completedAt: null,
+    start: null,
     due: null,
     time: null,
     duration: null,
@@ -150,6 +151,38 @@ describe('tasks store', () => {
     expect(ids(plan.untimed)).toEqual([3])
     expect(ids(plan.done)).toEqual([4])
     expect(store.dayPlan(addDays(day, 1)).overdue).toHaveLength(0)
+  })
+
+  it('puts a task spanning days on each of its days and tabs', () => {
+    const store = useTasksStore()
+    const day = today()
+    store.items = [
+      task({ id: 1, start: addDays(day, -1), due: addDays(day, 1) }), // yesterday – tomorrow
+      task({ id: 2, start: addDays(day, 1), due: addDays(day, 2) }), // tomorrow – the day after
+    ]
+
+    expect(store.counts.today).toBe(1)
+    expect(store.counts.overdue).toBe(0)
+    expect(store.counts.tomorrow).toBe(2)
+    expect(store.dayPlan(day).untimed.map(item => item.id)).toEqual([1])
+    expect(store.dayPlan(addDays(day, 1)).untimed.map(item => item.id).toSorted()).toEqual([1, 2])
+    expect(store.dayPlan(addDays(day, 2)).untimed.map(item => item.id)).toEqual([2])
+  })
+
+  it('keeps a span valid on update: no time, no start on or after the due day', async () => {
+    api.update.mockReturnValue(new Promise(() => {}))
+    const store = useTasksStore()
+    store.items = [task({ id: 1, due: '2026-10-20', time: '09:00', duration: 30 })]
+
+    void store.update(1, { start: '2026-10-18' })
+    expect(store.items[0]).toMatchObject({ start: '2026-10-18', time: null, duration: null })
+
+    void store.update(1, { due: '2026-10-18' })
+    expect(store.items[0]!.start).toBeNull()
+
+    void store.update(1, { start: '2026-10-16' })
+    void store.update(1, { due: null })
+    expect(store.items[0]).toMatchObject({ start: null, due: null })
   })
 
   it('puts a deleted task back when the server refuses', async () => {

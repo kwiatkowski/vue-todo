@@ -10,6 +10,7 @@ function task (id: number, time: string | null, duration: number | null = null):
     done: false,
     status: 'todo',
     completedAt: null,
+    start: null,
     due: '2026-10-16',
     time,
     duration,

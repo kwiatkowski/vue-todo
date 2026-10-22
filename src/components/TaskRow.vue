@@ -62,9 +62,10 @@
   import TaskProjectPicker from '@/components/TaskProjectPicker.vue'
   import { useTasksStore } from '@/stores/tasks'
   import { useUiStore } from '@/stores/ui'
-  import { formatDueParts, today } from '@/utils/date'
+  import { formatDueParts, formatSpan, spanLength, today } from '@/utils/date'
   import { formatRange } from '@/utils/day'
   import { endDragTask, setDragTask } from '@/utils/drag'
+  import { occursOn } from '@/utils/tasks'
 
   const props = withDefaults(defineProps<{
     task: Task
@@ -85,6 +86,17 @@
       return null
     }
 
+    // several days: the span, and below it how far along it is – also on a page of one day
+    if (props.task.start) {
+      const length = spanLength(props.task.start, props.task.due)
+      const day = today()
+
+      return {
+        day: formatSpan(props.task.start, props.task.due),
+        detail: occursOn(props.task, day) ? `dzień ${spanLength(props.task.start, day)} z ${length}` : `${length} dni`,
+      }
+    }
+
     // the day is the page's – just the time, if any
     if (!props.showDue) {
       return props.task.time ? { day: formatRange(props.task.time, props.task.duration), detail: null } : null
@@ -102,7 +114,7 @@
 
     const day = today()
 
-    return props.task.due < day ? 'row__due--overdue' : (props.task.due === day ? 'row__due--today' : null)
+    return props.task.due < day ? 'row__due--overdue' : (occursOn(props.task, day) ? 'row__due--today' : null)
   })
 
   const renaming = ref(false)
