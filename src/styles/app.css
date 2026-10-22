@@ -375,12 +375,21 @@ select.input {
 }
 
 .input--title {
+  display: block;
   border-color: transparent;
   background: transparent;
   padding-inline: 0;
+  overflow: hidden;
+  line-height: 1.35;
   font-size: 18px;
   font-weight: 600;
   letter-spacing: -.01em;
+}
+
+/* a title wraps but never gets a handle or the textarea's extra rows */
+textarea.input--title {
+  min-height: 0;
+  resize: none;
 }
 
 .input--title:hover,

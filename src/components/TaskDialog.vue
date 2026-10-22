@@ -2,7 +2,8 @@
   <BaseDialog v-model="open" :title="editing ? 'Zadanie' : (source ? 'Duplikuj zadanie' : 'Nowe zadanie')" :width="560" @submit="save">
     <template v-if="form">
       <div class="lead">
-        <input
+        <textarea
+          ref="titleField"
           v-model="form.title"
           :aria-invalid="titleError ? 'true' : undefined"
           aria-label="Tytuł"
@@ -10,8 +11,10 @@
           class="input input--title"
           maxlength="200"
           placeholder="Co jest do zrobienia?"
-          @input="titleError = false"
-        >
+          rows="1"
+          @input="onTitleInput"
+          @keydown.enter.prevent="save"
+        />
 
         <span v-if="titleError" class="error-text">Zadanie musi mieć tytuł.</span>
 
@@ -175,7 +178,7 @@
 <script lang="ts" setup>
   import type { Priority, Status } from '@/types'
   import { Copy, Flag, Trash2, X } from 'lucide-vue-next'
-  import { computed, defineAsyncComponent, ref, watch } from 'vue'
+  import { computed, defineAsyncComponent, nextTick, ref, useTemplateRef, watch } from 'vue'
   import BaseDialog from '@/components/ui/BaseDialog.vue'
   import { useNotifyStore } from '@/stores/notify'
   import { useProjectsStore } from '@/stores/projects'
@@ -263,10 +266,34 @@
       return ''
     }
 
-    const format = (iso: string) => new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })
+    const format = (iso: string) => new Date(iso).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
-    return task.completedAt ? `Ukończone ${format(task.completedAt)}` : `Dodane ${format(task.createdAt)}`
+    return task.completedAt ? `Ukończone: ${format(task.completedAt)}` : `Dodane: ${format(task.createdAt)}`
   })
+
+  // the title wraps instead of being cut off – one line per row of text, Enter still saves
+  const titleField = useTemplateRef<HTMLTextAreaElement>('titleField')
+
+  function fitTitle (): void {
+    const field = titleField.value
+
+    if (field) {
+      field.style.height = 'auto'
+      // scrollHeight leaves out the (transparent) border
+      field.style.height = `${field.scrollHeight + field.offsetHeight - field.clientHeight}px`
+    }
+  }
+
+  function onTitleInput (): void {
+    titleError.value = false
+
+    // pasted line breaks become spaces – a title is one line
+    if (form.value && /[\r\n]/.test(form.value.title)) {
+      form.value.title = form.value.title.replace(/[\r\n]+/g, ' ')
+    }
+
+    fitTitle()
+  }
 
   // a fresh copy each time the dialog opens – edits only reach the store on save
   watch(() => ui.task, value => {
@@ -287,6 +314,7 @@
       duration: initial.duration ?? null,
     }
     titleError.value = false
+    void nextTick(fitTitle)
   })
 
   // no time without a day, no duration without a time; the last day only after the first
@@ -371,7 +399,7 @@
 }
 
 .notes {
-  margin-inline: -10px;
+  margin-top: 4px;
 }
 
 .props {
@@ -411,9 +439,15 @@
   white-space: nowrap;
 }
 
+/* status and priority span the whole row, the options share it evenly */
 .props .seg {
-  justify-self: start;
+  display: flex;
   flex-wrap: wrap;
+}
+
+.props .seg button {
+  flex: 1;
+  justify-content: center;
 }
 
 .flag {

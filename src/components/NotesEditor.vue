@@ -90,36 +90,27 @@
 
 <style scoped>
 .notes {
-  border: 1px solid transparent;
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius);
-  transition: border-color .12s;
+  background: var(--panel);
+  transition: border-color .12s, box-shadow .12s;
 }
 
-.notes:hover,
-.notes--focus {
-  border-color: var(--line);
+.notes:hover {
+  border-color: var(--text-3);
 }
 
-/* the bar shows up with the field in use – a quiet dialog otherwise */
+.notes--focus,
+.notes--focus:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
 .notes__bar {
   display: flex;
   gap: 2px;
   padding: 4px;
   border-bottom: 1px solid var(--line);
-  opacity: 0;
-  transition: opacity .12s;
-}
-
-.notes:hover .notes__bar,
-.notes--focus .notes__bar,
-.notes__bar:focus-within {
-  opacity: 1;
-}
-
-@media (hover: none) {
-  .notes__bar {
-    opacity: 1;
-  }
 }
 
 .notes__tool {
@@ -152,6 +143,7 @@
 
 .notes__body {
   padding: 6px 10px;
+  line-height: 1.4;
   color: var(--text-2);
 }
 
@@ -163,12 +155,14 @@
   min-height: 5lh;
   max-height: max(5lh, min(15lh, 100dvh - 570px));
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
   outline: none;
   overflow-wrap: anywhere;
 }
 
 .notes__body :deep(.tiptap > * + *) {
-  margin-top: 6px;
+  margin-top: 3px;
 }
 
 .notes__body :deep(p) {
