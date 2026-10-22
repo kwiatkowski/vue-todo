@@ -6,6 +6,7 @@
     :style="{ '--width': `${width}px` }"
     @cancel.prevent="open = false"
     @click="onBackdrop"
+    @pointerdown="onPointerDown"
   >
     <form v-if="open" class="dialog__card" novalidate @submit.prevent="emit('submit')">
       <header class="dialog__head">
@@ -52,11 +53,20 @@
   watch(open, sync, { flush: 'post' })
   onMounted(() => sync(open.value))
 
+  /** where the press began – selecting text and letting go outside the card must not close it */
+  let pressedBackdrop = false
+
+  function onPointerDown (event: PointerEvent): void {
+    pressedBackdrop = event.target === dialog.value
+  }
+
   function onBackdrop (event: MouseEvent): void {
-    // a click on the dialog element itself (not the card) is a click on the backdrop
-    if (event.target === dialog.value) {
+    // a click on the dialog element itself (not the card) is a click on the backdrop – pressed and released there
+    if (event.target === dialog.value && pressedBackdrop) {
       open.value = false
     }
+
+    pressedBackdrop = false
   }
 </script>
 
@@ -65,6 +75,8 @@
   width: min(var(--width), calc(100vw - 24px));
   max-height: calc(100dvh - 48px);
   padding: 0;
+  /* only the body scrolls – the dialog's own (UA) overflow would add a second bar */
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);

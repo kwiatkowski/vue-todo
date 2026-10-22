@@ -15,15 +15,7 @@
 
         <span v-if="titleError" class="error-text">Zadanie musi mieć tytuł.</span>
 
-        <textarea
-          v-model="form.notes"
-          aria-label="Notatki"
-          class="input input--bare notes"
-          maxlength="5000"
-          placeholder="Notatki"
-          rows="2"
-          @input="grow"
-        />
+        <NotesEditor v-model="form.notes" class="notes" :max-length="5000" placeholder="Notatki" />
       </div>
 
       <div class="props">
@@ -183,7 +175,7 @@
 <script lang="ts" setup>
   import type { Priority, Status } from '@/types'
   import { Copy, Flag, Trash2, X } from 'lucide-vue-next'
-  import { computed, ref, watch } from 'vue'
+  import { computed, defineAsyncComponent, ref, watch } from 'vue'
   import BaseDialog from '@/components/ui/BaseDialog.vue'
   import { useNotifyStore } from '@/stores/notify'
   import { useProjectsStore } from '@/stores/projects'
@@ -193,6 +185,11 @@
   import { DEFAULT_DURATION, DURATIONS, formatDuration } from '@/utils/day'
   import { STATUS_ICONS } from '@/utils/icons'
   import { PRIORITIES, STATUSES } from '@/utils/tasks'
+
+  // the editor is the heaviest part of the app – kept out of the start, fetched once the app is idle
+  const loadNotesEditor = () => import('@/components/NotesEditor.vue')
+  const NotesEditor = defineAsyncComponent(loadNotesEditor)
+  setTimeout(() => void loadNotesEditor().catch(() => {}), 3000)
 
   interface Form {
     title: string
@@ -316,12 +313,6 @@
     }
   })
 
-  function grow (event: Event): void {
-    const area = event.target as HTMLTextAreaElement
-    area.style.height = 'auto'
-    area.style.height = `${area.scrollHeight}px`
-  }
-
   async function save (): Promise<void> {
     if (!form.value) {
       return
@@ -380,8 +371,7 @@
 }
 
 .notes {
-  min-height: 44px;
-  color: var(--text-2);
+  margin-inline: -10px;
 }
 
 .props {
