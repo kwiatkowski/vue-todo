@@ -1,5 +1,12 @@
 <template>
-  <BaseDialog v-model="open" :title="editing ? 'Zadanie' : (source ? 'Duplikuj zadanie' : 'Nowe zadanie')" :width="560" @submit="save">
+  <BaseDialog
+    ref="dialog"
+    v-model="open"
+    :can-close="canClose"
+    :title="editing ? 'Zadanie' : (source ? 'Duplikuj zadanie' : 'Nowe zadanie')"
+    :width="560"
+    @submit="save"
+  >
     <template v-if="form">
       <div class="lead">
         <textarea
@@ -39,18 +46,12 @@
 
         <label class="props__label" for="task-project">Projekt</label>
 
-        <select id="task-project" v-model="form.projectId" class="input">
-          <option :value="null">Do posortowania (bez projektu)</option>
-
-          <optgroup v-for="group in projects.grouped" :key="group.area?.id ?? 'none'" :label="group.area?.name ?? 'Bez kategorii'">
-            <option v-for="project in group.projects" :key="project.id" :value="project.id">{{ project.name }}</option>
-          </optgroup>
-        </select>
+        <ProjectSelect id="task-project" v-model="form.projectId" />
 
         <label class="props__label" for="task-from">Od</label>
 
         <div class="props__inline">
-          <input id="task-from" v-model="fromModel" class="input mono" type="date">
+          <input id="task-from" v-model="fromModel" class="input" type="date">
           <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.from === day }" type="button" @click="form.from = day">Dziś</button>
           <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.from === tomorrow }" type="button" @click="form.from = tomorrow">Jutro</button>
 
@@ -72,7 +73,7 @@
           <input
             id="task-to"
             v-model="toModel"
-            class="input mono"
+            class="input"
             :disabled="!form.from"
             :min="form.from ? addDays(form.from, 1) : undefined"
             :title="form.from ? 'Ostatni dzień – zadanie będzie widoczne każdego dnia od pierwszego' : 'Najpierw wybierz dzień'"
@@ -82,7 +83,7 @@
           <input
             v-model.number="daysModel"
             aria-label="Liczba dni"
-            class="input mono props__days"
+            class="input props__days"
             :disabled="!form.from"
             min="1"
             title="Liczba dni"
@@ -109,7 +110,7 @@
           <input
             id="task-time"
             v-model="timeModel"
-            class="input mono"
+            class="input"
             :disabled="!form.from || !!form.to"
             step="300"
             :title="form.to ? 'Zadanie na kilka dni trwa całe dni' : (form.from ? undefined : 'Najpierw wybierz dzień')"
@@ -152,33 +153,55 @@
     </template>
 
     <template #actions>
-      <button v-if="editing" class="btn btn--danger btn--sm" type="button" @click="removeTask">
-        <Trash2 /> Usuń
-      </button>
+      <!-- with changes made the only ways out are saving or dropping them; otherwise, from the right: save, cancel, duplicate, delete -->
+      <template v-if="dirty">
+        <span class="confirm"><AlertTriangle /> Niezapisane zmiany</span>
+        <span style="flex: 1" />
+        <button class="btn btn--danger btn--sm" type="button" @click="discard">Zamknij bez zapisywania</button>
 
-      <button
-        v-if="editing"
-        class="btn btn--sm"
-        title="Duplikuj – z możliwością zmiany projektu"
-        type="button"
-        @click="duplicate"
-      >
-        <Copy /> Duplikuj
-      </button>
+        <button class="btn btn--accent btn--sm" :disabled="saving" type="submit">
+          <component :is="editing ? Check : (source ? Copy : Plus)" />
+          {{ editing ? 'Zapisz' : (source ? 'Duplikuj' : 'Dodaj') }}
+        </button>
+      </template>
 
-      <span v-if="editing" class="stamp faint">{{ stamp }}</span>
-      <span v-if="source" class="stamp faint">Kopia „{{ source.title }}” – możesz zmienić projekt</span>
-      <span style="flex: 1" />
-      <button class="btn btn--sm" type="button" @click="open = false">Anuluj</button>
-      <button class="btn btn--primary btn--sm" :disabled="saving" type="submit">{{ editing ? 'Zapisz' : (source ? 'Duplikuj' : 'Dodaj') }}</button>
+      <template v-else>
+        <span v-if="editing" class="stamp faint">{{ stamp }}</span>
+        <span v-if="source" class="stamp faint">Kopia „{{ source.title }}” – możesz zmienić projekt</span>
+        <span style="flex: 1" />
+
+        <button v-if="editing" class="btn btn--danger btn--sm" type="button" @click="removeTask">
+          <Trash2 /> <span class="act__label">Usuń</span>
+        </button>
+
+        <button
+          v-if="editing"
+          class="btn btn--sm"
+          title="Duplikuj – z możliwością zmiany projektu"
+          type="button"
+          @click="duplicate"
+        >
+          <Copy /> <span class="act__label">Duplikuj</span>
+        </button>
+
+        <button class="btn btn--sm" type="button" @click="dialog?.requestClose()">
+          <X /> <span class="act__label">Anuluj</span>
+        </button>
+
+        <button class="btn btn--accent btn--sm" :disabled="!canSave" type="submit">
+          <component :is="editing ? Check : (source ? Copy : Plus)" />
+          {{ editing ? 'Zapisz' : (source ? 'Duplikuj' : 'Dodaj') }}
+        </button>
+      </template>
     </template>
   </BaseDialog>
 </template>
 
 <script lang="ts" setup>
   import type { Priority, Status } from '@/types'
-  import { Copy, Flag, Trash2, X } from 'lucide-vue-next'
+  import { AlertTriangle, Check, Copy, Flag, Plus, Trash2, X } from 'lucide-vue-next'
   import { computed, defineAsyncComponent, nextTick, ref, useTemplateRef, watch } from 'vue'
+  import ProjectSelect from '@/components/ProjectSelect.vue'
   import BaseDialog from '@/components/ui/BaseDialog.vue'
   import { useNotifyStore } from '@/stores/notify'
   import { useProjectsStore } from '@/stores/projects'
@@ -213,6 +236,13 @@
   const projects = useProjectsStore()
 
   const form = ref<Form | null>(null)
+  /** the form as it opened – what "changed" is measured against */
+  const pristine = ref('')
+  const dialog = useTemplateRef<InstanceType<typeof BaseDialog>>('dialog')
+
+  const dirty = computed(() => form.value !== null && JSON.stringify(form.value) !== pristine.value)
+  // an edit saves only what changed; a new task or a duplicate can go as it is
+  const canSave = computed(() => !saving.value && (dirty.value || !editing.value))
   const saving = ref(false)
   const titleError = ref(false)
 
@@ -313,6 +343,7 @@
       time: initial.time ?? null,
       duration: initial.duration ?? null,
     }
+    pristine.value = JSON.stringify(form.value)
     titleError.value = false
     void nextTick(fitTitle)
   })
@@ -341,8 +372,17 @@
     }
   })
 
+  /** ×, Esc and the backdrop close only an untouched form – changes are saved or dropped in the footer */
+  function canClose (): boolean {
+    return !dirty.value
+  }
+
+  function discard (): void {
+    open.value = false
+  }
+
   async function save (): Promise<void> {
-    if (!form.value) {
+    if (!form.value || !canSave.value) {
       return
     }
 
@@ -383,12 +423,11 @@
     }
   }
 
+  /** Asks first – the confirmation closes this dialog too once the task is gone. */
   function removeTask (): void {
     if (editing.value) {
-      void tasks.remove(editing.value.id)
+      ui.removeTask(editing.value)
     }
-
-    open.value = false
   }
 </script>
 
@@ -464,6 +503,21 @@
   font-size: 12px;
 }
 
+.confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--warn);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.confirm svg {
+  width: 16px;
+  height: 16px;
+}
+
 @media (max-width: 520px) {
   .props {
     grid-template-columns: minmax(0, 1fr);
@@ -474,7 +528,8 @@
     margin-bottom: 8px;
   }
 
-  .stamp {
+  .stamp,
+  .act__label {
     display: none;
   }
 }

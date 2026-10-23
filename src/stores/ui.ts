@@ -17,6 +17,8 @@ export const useUiStore = defineStore('ui', () => {
   const area = ref<{ area: Area | null } | null>(null)
   /** what is being copied – the copy dialog is open while set */
   const copying = ref<{ kind: 'area', item: Area } | { kind: 'project', item: Project } | null>(null)
+  /** the task waiting for "really delete?" – the confirmation is open while set */
+  const removing = ref<Task | null>(null)
 
   function editTask (value: Task): void {
     task.value = { task: value, defaults: {} }
@@ -47,5 +49,9 @@ export const useUiStore = defineStore('ui', () => {
     copying.value = { kind: 'project', item: value }
   }
 
-  return { sidebar, task, project, area, copying, editTask, newTask, duplicateTask, editProject, editArea, copyArea, copyProject }
+  function removeTask (value: Task): void {
+    removing.value = value
+  }
+
+  return { sidebar, task, project, area, copying, removing, editTask, newTask, duplicateTask, editProject, editArea, copyArea, copyProject, removeTask }
 })

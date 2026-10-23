@@ -4,7 +4,7 @@
     :aria-labelledby="titleId"
     class="dialog"
     :style="{ '--width': `${width}px` }"
-    @cancel.prevent="open = false"
+    @cancel.prevent="requestClose"
     @click="onBackdrop"
     @pointerdown="onPointerDown"
   >
@@ -12,7 +12,7 @@
       <header class="dialog__head">
         <h2 :id="titleId" class="dialog__title">{{ title }}</h2>
 
-        <button aria-label="Zamknij" class="btn btn--icon btn--sm" type="button" @click="open = false">
+        <button aria-label="Zamknij" class="btn btn--icon btn--sm" type="button" @click="requestClose">
           <X />
         </button>
       </header>
@@ -35,7 +35,12 @@
   /** Native <dialog>: focus trap, Esc and the top layer for free. */
   const open = defineModel<boolean>({ default: false })
 
-  withDefaults(defineProps<{ title: string, width?: number }>(), { width: 480 })
+  const props = withDefaults(defineProps<{
+    title: string
+    width?: number
+    /** asked before the user closes it (×, Esc, the backdrop) – false keeps it open, e.g. to confirm unsaved changes */
+    canClose?: () => boolean
+  }>(), { width: 480, canClose: undefined })
 
   const emit = defineEmits<{ submit: [] }>()
 
@@ -56,6 +61,14 @@
   /** where the press began – selecting text and letting go outside the card must not close it */
   let pressedBackdrop = false
 
+  function requestClose (): void {
+    if (!props.canClose || props.canClose()) {
+      open.value = false
+    }
+  }
+
+  defineExpose({ requestClose })
+
   function onPointerDown (event: PointerEvent): void {
     pressedBackdrop = event.target === dialog.value
   }
@@ -63,7 +76,7 @@
   function onBackdrop (event: MouseEvent): void {
     // a click on the dialog element itself (not the card) is a click on the backdrop – pressed and released there
     if (event.target === dialog.value && pressedBackdrop) {
-      open.value = false
+      requestClose()
     }
 
     pressedBackdrop = false
@@ -106,11 +119,15 @@
   max-height: inherit;
 }
 
+/* header and footer as panel-toned bars around the body */
 .dialog__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 14px 0 20px;
+  min-height: 48px;
+  padding: 0 12px 0 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
 }
 
 .dialog__title {
@@ -122,7 +139,7 @@
 .dialog__body {
   display: grid;
   gap: 16px;
-  padding: 8px 20px 20px;
+  padding: 16px 20px 20px;
   overflow-y: auto;
 }
 
@@ -132,5 +149,6 @@
   gap: 8px;
   padding: 12px 16px;
   border-top: 1px solid var(--line);
+  background: var(--panel);
 }
 </style>

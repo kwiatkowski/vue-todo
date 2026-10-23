@@ -11,6 +11,7 @@
     <ProjectDialog />
     <AreaDialog />
     <CopyDialog />
+    <RemoveTaskDialog />
     <ToastHost />
   </div>
 </template>
@@ -22,6 +23,7 @@
   import AreaDialog from '@/components/AreaDialog.vue'
   import CopyDialog from '@/components/CopyDialog.vue'
   import ProjectDialog from '@/components/ProjectDialog.vue'
+  import RemoveTaskDialog from '@/components/RemoveTaskDialog.vue'
   import TaskDialog from '@/components/TaskDialog.vue'
   import ToastHost from '@/components/ui/ToastHost.vue'
   import { useTabBadge } from '@/composables/tabBadge'

@@ -43,7 +43,7 @@
 
     <div class="menu__sep" />
 
-    <button class="menu__item menu__item--danger" role="menuitem" type="button" @click="tasks.remove(task.id)">
+    <button class="menu__item menu__item--danger" role="menuitem" type="button" @click="ui.removeTask(task)">
       <Trash2 /> Usuń
     </button>
   </DropMenu>
