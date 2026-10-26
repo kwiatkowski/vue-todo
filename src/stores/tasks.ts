@@ -242,13 +242,9 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  /** After a project is deleted its tasks land in the inbox – same as on the server. */
-  function detachProject (projectId: number): void {
-    for (const task of items.value) {
-      if (task.projectId === projectId) {
-        task.projectId = null
-      }
-    }
+  /** A project taken out of Todo hides its tasks with it – same as on the server; they come back with it. */
+  function hideProject (projectId: number): void {
+    items.value = items.value.filter(task => task.projectId !== projectId)
   }
 
   function replace (id: number, task: Task): void {
@@ -259,7 +255,7 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  return { items, status, loadError, open, counts, listFor, dayPlan, load, add, update, setStatus, toggle, remove, detachProject }
+  return { items, status, loadError, open, counts, listFor, dayPlan, load, add, update, setStatus, toggle, remove, hideProject }
 })
 
 /** The same coupling the server applies: status ⇄ done, no time without a day. */
