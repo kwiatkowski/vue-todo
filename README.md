@@ -1,9 +1,7 @@
 # vue-todo
 
 Osobista aplikacja Todo z podziałem na kategorie i projekty – Vue 3 + Pinia, własny styl „Atrament” (bez bibliotek UI).
-Dane i logowanie zapewnia WordPress z pluginem [wp-plugin-todo](https://github.com/kwiatkowski/wp-plugin-todo);
-projekty to lista z [wp-plugin-projects](https://github.com/kwiatkowski/wp-plugin-projects) (aplikacja
-[vue-projects](https://github.com/kwiatkowski/vue-projects) pod `/projects/`) – w Todo te z „Pokaż w Todo”.
+Dane i logowanie zapewnia WordPress z pluginem [wp-plugin-todo](https://github.com/kwiatkowski/wp-plugin-todo).
 
 ## Jak to działa
 
@@ -94,8 +92,6 @@ Widoki:
 Kategorie (np. Praca, Dom) grupują projekty w panelu bocznym; WordPress tworzy „Praca” i „Dom” przy pierwszym uruchomieniu.
 Kolejność kategorii zmieniasz, przeciągając je za nagłówek w panelu bocznym albo przez menu „…” kategorii
 (Przesuń w górę / w dół); zapisuje się w WordPressie, nowa kategoria trafia na koniec.
-„Ukryj w Todo” w oknie projektu chowa go razem z zadaniami – projekt zostaje na liście projektów, a „Pokaż w Todo”
-tam przywraca go z zadaniami.
 Projekty przeciągasz w panelu tak samo – w obrębie kategorii albo do innej (upuszczenie na nagłówek
 kategorii dokłada projekt na koniec); nowy projekt trafia na koniec swojej kategorii.
 

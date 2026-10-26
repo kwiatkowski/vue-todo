@@ -86,8 +86,8 @@ export const useProjectsStore = defineStore('projects', () => {
     try {
       await projectsApi.remove(id)
       items.value = items.value.filter(item => item.id !== id)
-      useTasksStore().hideProject(id)
-      notify.show('Projekt ukryty w Todo – przywrócisz go z zadaniami w Projektach.')
+      useTasksStore().detachProject(id)
+      notify.show('Projekt usunięty – jego zadania są w „Do posortowania”.')
 
       return true
     } catch (error) {

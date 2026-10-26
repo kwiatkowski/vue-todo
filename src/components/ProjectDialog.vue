@@ -46,12 +46,12 @@
     </div>
 
     <div v-if="confirmDelete" class="alert">
-      <div>Ukryć „{{ project?.name }}” w Todo? Zniknie razem z zadaniami – zostaje na liście projektów, skąd przywrócisz go z nimi („Pokaż w Todo”).</div>
+      <div>Usunąć projekt „{{ project?.name }}”? Jego zadania trafią do „Do posortowania”.</div>
     </div>
 
     <template #actions>
       <template v-if="project">
-        <button v-if="!confirmDelete" class="btn btn--danger btn--sm" type="button" @click="confirmDelete = true">Ukryj w Todo</button>
+        <button v-if="!confirmDelete" class="btn btn--danger btn--sm" type="button" @click="confirmDelete = true">Usuń</button>
 
         <button v-if="!confirmDelete" class="btn btn--sm" type="button" @click="copyProject">
           <Copy /> Kopiuj
@@ -63,7 +63,7 @@
           :disabled="busy"
           type="button"
           @click="removeProject"
-        >Tak, ukryj</button>
+        >Tak, usuń</button>
       </template>
 
       <span style="flex: 1" />
