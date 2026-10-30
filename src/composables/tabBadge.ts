@@ -15,7 +15,7 @@ export function setPageTitle (title: string): void {
 const BLINK_MS = 1500
 
 /** the app's mark – same as public/favicon.svg */
-const MARK = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#4c662b"/><path d="M18 33.5 27.5 43 47 22" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+const MARK = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#7a9a3a"/><path d="M18 33.5 27.5 43 47 22" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 const markUrl = `data:image/svg+xml,${encodeURIComponent(MARK)}`
 
@@ -45,7 +45,7 @@ function countIcon (count: number, overdue: boolean): string {
     return markUrl
   }
 
-  context.fillStyle = overdue ? '#c2412d' : '#4c662b'
+  context.fillStyle = overdue ? '#c2412d' : '#7a9a3a'
   context.beginPath()
   context.roundRect(0, 0, size, size, 16)
   context.fill()
