@@ -155,6 +155,7 @@
   gap: 12px;
   padding: 7px 8px 7px 10px;
   border-bottom: 1px solid var(--line);
+  font-size: 13px;
   cursor: pointer;
 }
 
