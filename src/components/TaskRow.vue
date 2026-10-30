@@ -153,7 +153,7 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 10px 8px 10px 10px;
+  padding: 7px 8px 7px 10px;
   border-bottom: 1px solid var(--line);
   cursor: pointer;
 }
@@ -168,9 +168,18 @@
   margin-top: 1px;
 }
 
+/* the chips sit on the title's line – one line per task while there is room, under the title when not */
 .row__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
   flex: 1;
   min-width: 0;
+}
+
+.row__main > .meta {
+  margin-top: 0;
 }
 
 .row__title {
@@ -197,13 +206,22 @@
   margin-left: 4px;
 }
 
-/* due date as a quiet right-hand column: grey, ink for today, red when overdue */
+/* due date as a quiet right-hand column: grey, ink for today, red when overdue – the day and its detail on one line */
 .row__due {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
   flex: none;
   min-width: 84px;
-  padding-top: 1px;
+  padding-top: 2px;
   text-align: right;
   line-height: 1.3;
+}
+
+.row__due-detail::before {
+  content: '·';
+  margin-right: 6px;
 }
 
 .row__due-day {
@@ -243,9 +261,15 @@
   color: var(--text-3);
 }
 
+/* a phone keeps the two short lines – the title needs the width */
 @media (max-width: 520px) {
   .row__due {
+    display: block;
     min-width: 0;
+  }
+
+  .row__due-detail::before {
+    content: none;
   }
 }
 

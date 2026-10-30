@@ -479,8 +479,8 @@
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin: 28px 0 4px;
-  padding: 0 10px 8px;
+  margin: 20px 0 4px;
+  padding: 0 10px 6px;
   border-bottom: 1px solid var(--line-strong);
   font-size: 13px;
   font-weight: 600;
