@@ -225,7 +225,7 @@
 
 .pselect__trigger[aria-expanded='true'] {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: var(--focus-ring);
 }
 
 .pselect__name {

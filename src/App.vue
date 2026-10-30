@@ -1,4 +1,6 @@
 <template>
+  <AppTopbar />
+
   <div class="shell" :class="{ 'shell--open': ui.sidebar }">
     <AppSidebar class="shell__side" />
     <div class="shell__scrim" @click="ui.sidebar = false" />
@@ -20,6 +22,7 @@
   import { onMounted, watch } from 'vue'
   import { useRoute } from 'vue-router'
   import AppSidebar from '@/components/AppSidebar.vue'
+  import AppTopbar from '@/components/AppTopbar.vue'
   import AreaDialog from '@/components/AreaDialog.vue'
   import CopyDialog from '@/components/CopyDialog.vue'
   import ProjectDialog from '@/components/ProjectDialog.vue'
@@ -61,13 +64,14 @@
 .shell {
   display: grid;
   grid-template-columns: var(--sidebar) minmax(0, 1fr);
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--topbar));
 }
 
+/* under the top bar, the rest of the screen's height */
 .shell__side {
   position: sticky;
-  top: 0;
-  height: 100dvh;
+  top: var(--topbar);
+  height: calc(100dvh - var(--topbar));
 }
 
 .shell__scrim {

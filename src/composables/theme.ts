@@ -1,17 +1,11 @@
 import { computed, ref } from 'vue'
 
 const KEY = 'todo:theme'
-const media = typeof window === 'undefined' ? null : window.matchMedia('(prefers-color-scheme: dark)')
 
-/** 'light' | 'dark' when pinned by the user, null = follow the system (index.html applies the saved one early) */
-const pinned = ref<string | null>(typeof document === 'undefined' ? null : document.documentElement.dataset.theme ?? null)
-const systemDark = ref(media?.matches ?? false)
+/** 'light' or 'dark' – dark unless the user picked light (index.html applies it before the first paint) */
+const pinned = ref<string>(typeof document === 'undefined' ? 'dark' : document.documentElement.dataset.theme ?? 'dark')
 
-media?.addEventListener('change', event => {
-  systemDark.value = event.matches
-})
-
-const dark = computed(() => pinned.value ? pinned.value === 'dark' : systemDark.value)
+const dark = computed(() => pinned.value === 'dark')
 
 function toggleTheme (): void {
   const next = dark.value ? 'light' : 'dark'

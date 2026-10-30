@@ -1,9 +1,9 @@
 /*
  * "Atrament" – the app's own look: warm paper, ink-dark text, hairlines instead of shadows,
  * one cactus-green accent (the site's #88a24c, darkened for contrast). Geist for text, Geist Mono for
- * everything that is a number – dates, times, counters.
+ * everything that is a number – dates, times, counters. The same look as the list of projects.
  *
- * Light and dark follow the system; `data-theme` on <html> pins one.
+ * Dark by default (index.html sets `data-theme` on <html> before the first paint), light when the user picks it.
  */
 
 :root {
@@ -42,6 +42,11 @@
   --radius-sm: 6px;
   --radius: 8px;
   --radius-lg: 12px;
+
+  /* the top bar – the same as in the list of projects */
+  --topbar: 52px;
+  /* nothing around a focused field – its green edge alone, the one 1px line every focused control has (as in the list of projects) */
+  --focus-ring: none;
 
   --sidebar: 268px;
   /* the inset of content from the edges – the sidebar's and the page's alike */
@@ -158,8 +163,8 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
 }
 
 ::selection {
@@ -345,7 +350,7 @@ a {
 
 .input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: var(--focus-ring);
 }
 
 /* locked: dashed edge and faint text – clearly not a field to type in */

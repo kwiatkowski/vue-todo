@@ -483,7 +483,7 @@
   padding: 0 10px 6px;
   border-bottom: 1px solid var(--line-strong);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .group--overdue {

@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#f6f5f1">
+    <meta name="theme-color" content="#151513">
     <link rel="icon" href="/todo/web/favicon.svg" type="image/svg+xml">
     <title>Todo</title>
-    <!-- the saved theme before the first paint – no flash of the wrong one -->
-    <script>try{var t=localStorage.getItem('todo:theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
-    <script type="module" crossorigin src="/todo/web/assets/index-lUFxYHIY.js"></script>
+    <!-- the saved theme (dark by default, as in the list of projects) before the first paint – no flash of the wrong one -->
+    <script>var t='dark';try{t=localStorage.getItem('todo:theme')==='light'?'light':'dark'}catch(e){}document.documentElement.dataset.theme=t;if(t==='light')document.querySelector('meta[name="theme-color"]').setAttribute('content','#f6f5f1')</script>
+    <script type="module" crossorigin src="/todo/web/assets/index-C7Ogv3rO.js"></script>
     <link rel="modulepreload" crossorigin href="/todo/web/assets/_plugin-vue_export-helper-Bb6g2goP.js">
     <link rel="modulepreload" crossorigin href="/todo/web/assets/runtime-dom.esm-bundler-DuC5jAS3.js">
-    <link rel="stylesheet" crossorigin href="/todo/web/assets/index-CsllZTzA.css">
+    <link rel="stylesheet" crossorigin href="/todo/web/assets/index-Da8EBUPg.css">
   </head>
   <body>
     <div id="app"></div>

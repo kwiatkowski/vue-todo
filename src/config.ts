@@ -11,6 +11,8 @@ export interface AppConfig {
   user: { name: string, avatar: string } | null
   logoutUrl: string | null
   adminUrl: string | null
+  /** the list of projects (wp-plugin-projects) – the account menu leads there; null without it */
+  projectsUrl: string | null
   version: string | null
   /** finished tasks are moved to the trash this many days after; 0 = kept */
   doneRetentionDays: number
@@ -32,6 +34,7 @@ export const config: AppConfig = {
   user: injected.user ?? null,
   logoutUrl: injected.logoutUrl ?? null,
   adminUrl: injected.adminUrl ?? null,
+  projectsUrl: injected.projectsUrl ?? null,
   version: injected.version ?? null,
   doneRetentionDays: injected.doneRetentionDays ?? 30,
 }

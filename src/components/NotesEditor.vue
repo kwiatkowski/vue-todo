@@ -103,7 +103,7 @@
 .notes--focus,
 .notes--focus:hover {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: var(--focus-ring);
 }
 
 .notes__bar {

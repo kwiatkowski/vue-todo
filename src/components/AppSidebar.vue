@@ -1,5 +1,6 @@
 <template>
   <nav aria-label="Nawigacja" class="side">
+    <!-- the brand and the account are in the top bar; on a phone the sidebar slides over it, so it has its own close -->
     <div class="side__brand">
       <span class="side__logo"><Check :stroke-width="3" /></span>
       <span class="side__name">Todo</span>
@@ -230,56 +231,15 @@
       </button>
     </div>
 
-    <footer class="side__foot">
-      <img v-if="config.user?.avatar" alt="" class="side__avatar" :src="config.user.avatar">
-
-      <div class="side__user">
-        <div class="side__user-name">{{ config.user?.name ?? 'Todo' }}</div>
-        <div v-if="config.version" class="side__version mono">v{{ config.version }}</div>
-      </div>
-
-      <button
-        :aria-label="dark ? 'Jasny motyw' : 'Ciemny motyw'"
-        class="btn btn--icon btn--sm"
-        :title="dark ? 'Jasny motyw' : 'Ciemny motyw'"
-        type="button"
-        @click="toggleTheme"
-      >
-        <Sun v-if="dark" />
-        <Moon v-else />
-      </button>
-
-      <a
-        v-if="config.adminUrl"
-        aria-label="Panel WordPressa"
-        class="btn btn--icon btn--sm"
-        :href="config.adminUrl"
-        title="Panel WordPressa"
-      >
-        <LayoutDashboard />
-      </a>
-
-      <a
-        v-if="config.logoutUrl"
-        aria-label="Wyloguj"
-        class="btn btn--icon btn--sm"
-        :href="config.logoutUrl"
-        title="Wyloguj"
-      >
-        <LogOut />
-      </a>
-    </footer>
   </nav>
 </template>
 
 <script lang="ts" setup>
   import type { Area, Project } from '@/types'
-  import { ArrowDown, ArrowUp, CalendarDays, Check, ChevronDown, CircleCheck, Copy, FolderOpen, GripVertical, Inbox, Layers, LayoutDashboard, LogOut, Moon, Pencil, Plus, Sun, X } from 'lucide-vue-next'
+  import { ArrowDown, ArrowUp, CalendarDays, Check, ChevronDown, CircleCheck, Copy, FolderOpen, GripVertical, Inbox, Layers, Pencil, Plus, Sun, X } from 'lucide-vue-next'
   import { computed, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import DropMenu from '@/components/ui/DropMenu.vue'
-  import { useTheme } from '@/composables/theme'
-  import { config } from '@/config'
   import { useAreasStore } from '@/stores/areas'
   import { useProjectsStore } from '@/stores/projects'
   import { useTasksStore } from '@/stores/tasks'
@@ -301,7 +261,6 @@
   /** project being dragged, the area (null = no category) it would land in and next to which project */
   const draggingProject = ref<number | null>(null)
   const projectDrop = ref<{ areaId: number | null, target: { id: number, after: boolean } | null } | null>(null)
-  const { dark, toggleTheme } = useTheme()
 
   const views = computed(() => [
     // today, tomorrow and both weeks are tabs of one page; the count is today's (with the overdue)
@@ -500,7 +459,7 @@
 }
 
 .side__brand {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 10px;
   padding: var(--edge) 16px 14px var(--edge);
@@ -528,14 +487,14 @@
 }
 
 .side__close {
-  display: none;
+  margin-right: -6px;
 }
 
 .side__scroll {
   flex: 1;
   overflow-y: auto;
   /* + the links' own 8px = the same --edge as the page */
-  padding: 0 calc(var(--edge) - 8px) 16px;
+  padding: 14px calc(var(--edge) - 8px) 16px;
 }
 
 .side__group {
@@ -904,43 +863,9 @@
   margin-top: -6px;
 }
 
-.side__foot {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 10px 10px 10px 14px;
-  border-top: 1px solid var(--line);
-}
-
-.side__avatar {
-  width: 26px;
-  height: 26px;
-  margin-right: 6px;
-  border-radius: 50%;
-}
-
-.side__user {
-  flex: 1;
-  min-width: 0;
-  line-height: 1.25;
-}
-
-.side__user-name {
-  overflow: hidden;
-  font-size: 13px;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.side__version {
-  color: var(--text-3);
-  font-size: 11px;
-}
-
 @media (max-width: 900px) {
-  .side__close {
-    display: inline-flex;
+  .side__brand {
+    display: flex;
   }
 }
 </style>

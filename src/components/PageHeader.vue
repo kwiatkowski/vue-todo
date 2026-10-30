@@ -1,9 +1,5 @@
 <template>
   <header class="head">
-    <button aria-label="Menu" class="btn btn--icon head__menu" type="button" @click="ui.sidebar = true">
-      <Menu />
-    </button>
-
     <div class="head__titles">
       <div v-if="eyebrow" class="eyebrow">{{ eyebrow }}</div>
 
@@ -25,8 +21,6 @@
 
 <script lang="ts" setup>
   import type { Component } from 'vue'
-  import { Menu } from 'lucide-vue-next'
-  import { useUiStore } from '@/stores/ui'
 
   defineProps<{
     title: string
@@ -37,8 +31,6 @@
     /** category icon */
     icon?: Component
   }>()
-
-  const ui = useUiStore()
 </script>
 
 <style scoped>
@@ -48,12 +40,6 @@
   flex-wrap: wrap;
   gap: 12px 16px;
   padding: var(--edge) 0 20px;
-}
-
-.head__menu {
-  display: none;
-  align-self: center;
-  margin-left: -8px;
 }
 
 /* actions wrap under the title when there's no room beside it */
@@ -104,10 +90,6 @@
 @media (max-width: 900px) {
   .head {
     align-items: center;
-  }
-
-  .head__menu {
-    display: inline-flex;
   }
 
   .head__title {
