@@ -158,7 +158,8 @@
     </div>
 
     <template #actions>
-      <!-- with changes made the only ways out are saving or dropping them; otherwise, from the right: save, cancel, duplicate, delete -->
+      <!-- with changes made the only ways out are saving or dropping them; otherwise as in the projects list: delete on
+           the left, duplicate, cancel and save on the right -->
       <template v-if="dirty">
         <span class="confirm"><AlertTriangle /> Niezapisane zmiany</span>
         <span style="flex: 1" />
@@ -171,13 +172,12 @@
       </template>
 
       <template v-else>
-        <span v-if="editing" class="stamp faint">{{ stamp }}</span>
-        <span v-if="source" class="stamp faint">Kopia „{{ source.title }}” – możesz zmienić projekt</span>
-        <span style="flex: 1" />
-
         <button v-if="editing" class="btn btn--danger btn--sm" type="button" @click="removeTask">
           <Trash2 /> <span class="act__label">Usuń</span>
         </button>
+
+        <span v-if="source" class="stamp faint">Kopia „{{ source.title }}” – możesz zmienić projekt</span>
+        <span style="flex: 1" />
 
         <button
           v-if="editing"
@@ -293,18 +293,6 @@
   const timeModel = computed({
     get: () => form.value?.time ?? '',
     set: value => form.value && (form.value.time = value || null),
-  })
-
-  const stamp = computed(() => {
-    const task = editing.value
-
-    if (!task) {
-      return ''
-    }
-
-    const format = (iso: string) => new Date(iso).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })
-
-    return task.completedAt ? `Ukończone: ${format(task.completedAt)}` : `Dodane: ${format(task.createdAt)}`
   })
 
   // the title wraps instead of being cut off – one line per row of text, Enter still saves

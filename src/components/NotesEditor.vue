@@ -1,25 +1,51 @@
 <template>
-  <div class="notes" :class="{ 'notes--focus': focused }">
-    <!-- with a label: the label until the editor is in use, then the tools in its place – the bar keeps its height -->
-    <div v-if="editor && label && !focused" class="notes__bar notes__label" @click="editor.commands.focus('end')">{{ label }}</div>
+  <div class="notes-field">
+    <!-- with a label: a field label above the box, the tools at its right only while editing – the row keeps its height -->
+    <div v-if="label" class="notes__head">
+      <span class="notes__label" @click="editor?.commands.focus('end')">{{ label }}</span>
 
-    <div v-else-if="editor" aria-label="Formatowanie" class="notes__bar" role="toolbar">
-      <button
-        v-for="tool in TOOLS"
-        :key="tool.name"
-        :aria-label="tool.title"
-        :aria-pressed="editor.isActive(tool.name)"
-        class="notes__tool"
-        :title="tool.title"
-        type="button"
-        @click="tool.run(editor)"
-        @mousedown.prevent
+      <div
+        v-if="editor"
+        v-show="focused"
+        aria-label="Formatowanie"
+        class="notes__tools"
+        role="toolbar"
       >
-        <component :is="tool.icon" />
-      </button>
+        <button
+          v-for="tool in TOOLS"
+          :key="tool.name"
+          :aria-label="tool.title"
+          :aria-pressed="editor.isActive(tool.name)"
+          class="notes__tool"
+          :title="tool.title"
+          type="button"
+          @click="tool.run(editor)"
+          @mousedown.prevent
+        >
+          <component :is="tool.icon" />
+        </button>
+      </div>
     </div>
 
-    <EditorContent class="notes__body" :editor="editor" />
+    <div class="notes" :class="{ 'notes--focus': focused }">
+      <div v-if="editor && !label" aria-label="Formatowanie" class="notes__bar" role="toolbar">
+        <button
+          v-for="tool in TOOLS"
+          :key="tool.name"
+          :aria-label="tool.title"
+          :aria-pressed="editor.isActive(tool.name)"
+          class="notes__tool"
+          :title="tool.title"
+          type="button"
+          @click="tool.run(editor)"
+          @mousedown.prevent
+        >
+          <component :is="tool.icon" />
+        </button>
+      </div>
+
+      <EditorContent class="notes__body" :editor="editor" />
+    </div>
   </div>
 </template>
 
@@ -116,14 +142,30 @@
   border-bottom: 1px solid var(--line);
 }
 
-.notes__label {
+.notes-field {
+  display: grid;
+  gap: 2px;
+}
+
+/* the label as the other fields' (.field > span); as tall as a tool, so the tools showing up move nothing */
+.notes__head {
+  display: flex;
   align-items: center;
-  padding: 4px 10px;
-  /* a line as tall as a tool – the bar is as high with the label as with the tools */
-  line-height: 28px;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.notes__label {
   color: var(--text-2);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: text;
+}
+
+.notes__tools {
+  display: flex;
+  gap: 2px;
 }
 
 .notes__tool {

@@ -79,9 +79,11 @@
         <ul class="feed">
           <li v-for="event in newestFirst(activity.history)" :key="event.id" class="feed__item">
             <div class="feed__head">
-              <span class="feed__who">{{ event.type === 'created' ? 'Utworzone' : 'Zmiana' }}</span>
+              <span class="feed__who">{{ EVENT_TITLES[event.type] }}</span>
               <span class="faint">{{ formatMoment(event.createdAt) }}<template v-if="event.author"> · {{ event.author }}</template></span>
             </div>
+
+            <p v-if="event.type === 'commented' && event.text" class="feed__text feed__quote">{{ event.text }}</p>
 
             <ul v-if="event.type === 'changed'" class="changes">
               <li v-for="(change, index) in event.changes.map(describeChange)" :key="index">
@@ -108,7 +110,7 @@
 </template>
 
 <script lang="ts" setup>
-  import type { Task, TaskActivity } from '@/types'
+  import type { Task, TaskActivity, TaskEvent } from '@/types'
   import type { Component } from 'vue'
   import { History, MessageSquare, MessageSquarePlus, Trash2 } from 'lucide-vue-next'
   import { computed, ref, watch } from 'vue'
@@ -120,6 +122,8 @@
   const props = defineProps<{ task: Task | null }>()
 
   type Tab = 'comments' | 'history'
+
+  const EVENT_TITLES: Record<TaskEvent['type'], string> = { created: 'Utworzone', changed: 'Zmiana', commented: 'Komentarz' }
 
   const TABS: Array<{ key: Tab, label: string, icon: Component }> = [
     { key: 'comments', label: 'Komentarze', icon: MessageSquare },
@@ -186,6 +190,8 @@
       const comment = await tasksApi.comment(props.task.id, text)
       activity.value?.comments.push(comment)
       draft.value = ''
+      // the comment left a line in the history too
+      void load()
     } catch (error) {
       notify.error(error)
     } finally {
@@ -364,6 +370,12 @@ p {
 .feed__text {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.feed__quote {
+  padding-left: 8px;
+  border-left: 2px solid var(--line-strong);
+  color: var(--text-2);
 }
 
 .changes {

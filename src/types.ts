@@ -66,14 +66,15 @@ export interface TaskChange {
   to: string | number | null
 }
 
-/** One save of a task: its creation, or what one edit changed. */
+/** One save of a task: its creation, what one edit changed, or a comment added (`text` – its start). */
 export interface TaskEvent {
   id: number
-  type: 'created' | 'changed'
+  type: 'created' | 'changed' | 'commented'
   /** ISO 8601 (UTC) */
   createdAt: string
   author: string | null
   changes: TaskChange[]
+  text: string | null
 }
 
 /** oldest first */
