@@ -4,153 +4,158 @@
     v-model="open"
     :can-close="canClose"
     :title="editing ? 'Zadanie' : (source ? 'Duplikuj zadanie' : 'Nowe zadanie')"
-    :width="560"
+    :width="1080"
     @submit="save"
   >
-    <template v-if="form">
-      <div class="lead">
-        <textarea
-          ref="titleField"
-          v-model="form.title"
-          :aria-invalid="titleError ? 'true' : undefined"
-          aria-label="Tytuł"
-          autofocus
-          class="input input--title"
-          maxlength="200"
-          placeholder="Co jest do zrobienia?"
-          rows="1"
-          @input="onTitleInput"
-          @keydown.enter.prevent="save"
-        />
+    <!-- two columns: the task on the left, its comments and history (tabs, more to come) on the right -->
+    <div v-if="form" class="cols">
+      <div class="col">
+        <div class="lead">
+          <textarea
+            ref="titleField"
+            v-model="form.title"
+            :aria-invalid="titleError ? 'true' : undefined"
+            aria-label="Tytuł"
+            autofocus
+            class="input input--title"
+            maxlength="200"
+            placeholder="Co jest do zrobienia?"
+            rows="1"
+            @input="onTitleInput"
+            @keydown.enter.prevent="save"
+          />
 
-        <span v-if="titleError" class="error-text">Zadanie musi mieć tytuł.</span>
+          <span v-if="titleError" class="error-text">Zadanie musi mieć tytuł.</span>
 
-        <NotesEditor v-model="form.notes" class="notes" :max-length="5000" placeholder="Notatki" />
+          <NotesEditor v-model="form.notes" class="notes" :max-length="5000" placeholder="Notatki" />
+        </div>
+
+        <div class="props">
+          <span class="props__label">Status</span>
+
+          <div aria-label="Status" class="seg" role="radiogroup">
+            <button
+              v-for="item in STATUSES"
+              :key="item.value"
+              :aria-checked="form.status === item.value"
+              role="radio"
+              type="button"
+              @click="form.status = item.value"
+            >
+              <component :is="STATUS_ICONS[item.value]" /> {{ item.title }}
+            </button>
+          </div>
+
+          <label class="props__label" for="task-project">Projekt</label>
+
+          <ProjectSelect id="task-project" v-model="form.projectId" />
+
+          <label class="props__label" for="task-from">Od</label>
+
+          <div class="props__inline">
+            <input id="task-from" v-model="fromModel" class="input" type="date">
+            <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.from === day }" type="button" @click="form.from = day">Dziś</button>
+            <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.from === tomorrow }" type="button" @click="form.from = tomorrow">Jutro</button>
+
+            <button
+              v-if="form.from"
+              aria-label="Bez terminu"
+              class="btn btn--icon btn--sm"
+              title="Bez terminu"
+              type="button"
+              @click="form.from = null"
+            >
+              <X />
+            </button>
+          </div>
+
+          <label class="props__label" for="task-to">Do</label>
+
+          <div class="props__inline">
+            <input
+              id="task-to"
+              v-model="toModel"
+              class="input"
+              :disabled="!form.from"
+              :min="form.from ? addDays(form.from, 1) : undefined"
+              :title="form.from ? 'Ostatni dzień – zadanie będzie widoczne każdego dnia od pierwszego' : 'Najpierw wybierz dzień'"
+              type="date"
+            >
+
+            <input
+              v-model.number="daysModel"
+              aria-label="Liczba dni"
+              class="input props__days"
+              :disabled="!form.from"
+              min="1"
+              title="Liczba dni"
+              type="number"
+            >
+
+            <span class="props__hint">{{ daysModel === 1 ? 'dzień' : 'dni' }}</span>
+
+            <button
+              v-if="form.to"
+              aria-label="Jeden dzień"
+              class="btn btn--icon btn--sm"
+              title="Jeden dzień"
+              type="button"
+              @click="form.to = null"
+            >
+              <X />
+            </button>
+          </div>
+
+          <label class="props__label" for="task-time">Godzina</label>
+
+          <div class="props__inline">
+            <input
+              id="task-time"
+              v-model="timeModel"
+              class="input"
+              :disabled="!form.from || !!form.to"
+              step="300"
+              :title="form.to ? 'Zadanie na kilka dni trwa całe dni' : (form.from ? undefined : 'Najpierw wybierz dzień')"
+              type="time"
+            >
+
+            <select v-model="form.duration" aria-label="Czas trwania" class="input" :disabled="!form.time">
+              <option :value="null">{{ formatDuration(DEFAULT_DURATION) }} (domyślnie)</option>
+              <option v-for="item in durations" :key="item.value" :value="item.value">{{ item.title }}</option>
+            </select>
+
+            <button
+              v-if="form.time"
+              aria-label="Bez godziny"
+              class="btn btn--icon btn--sm"
+              title="Bez godziny"
+              type="button"
+              @click="form.time = null"
+            >
+              <X />
+            </button>
+          </div>
+
+          <span class="props__label">Priorytet</span>
+
+          <div aria-label="Priorytet" class="seg" role="radiogroup">
+            <button
+              v-for="item in PRIORITIES"
+              :key="item.value"
+              :aria-checked="form.priority === item.value"
+              :class="`p-${item.value}`"
+              role="radio"
+              type="button"
+              @click="form.priority = item.value"
+            >
+              <Flag class="flag" /> {{ item.title }}
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div class="props">
-        <span class="props__label">Status</span>
-
-        <div aria-label="Status" class="seg" role="radiogroup">
-          <button
-            v-for="item in STATUSES"
-            :key="item.value"
-            :aria-checked="form.status === item.value"
-            role="radio"
-            type="button"
-            @click="form.status = item.value"
-          >
-            <component :is="STATUS_ICONS[item.value]" /> {{ item.title }}
-          </button>
-        </div>
-
-        <label class="props__label" for="task-project">Projekt</label>
-
-        <ProjectSelect id="task-project" v-model="form.projectId" />
-
-        <label class="props__label" for="task-from">Od</label>
-
-        <div class="props__inline">
-          <input id="task-from" v-model="fromModel" class="input" type="date">
-          <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.from === day }" type="button" @click="form.from = day">Dziś</button>
-          <button class="btn btn--outline btn--sm" :class="{ 'is-on': form.from === tomorrow }" type="button" @click="form.from = tomorrow">Jutro</button>
-
-          <button
-            v-if="form.from"
-            aria-label="Bez terminu"
-            class="btn btn--icon btn--sm"
-            title="Bez terminu"
-            type="button"
-            @click="form.from = null"
-          >
-            <X />
-          </button>
-        </div>
-
-        <label class="props__label" for="task-to">Do</label>
-
-        <div class="props__inline">
-          <input
-            id="task-to"
-            v-model="toModel"
-            class="input"
-            :disabled="!form.from"
-            :min="form.from ? addDays(form.from, 1) : undefined"
-            :title="form.from ? 'Ostatni dzień – zadanie będzie widoczne każdego dnia od pierwszego' : 'Najpierw wybierz dzień'"
-            type="date"
-          >
-
-          <input
-            v-model.number="daysModel"
-            aria-label="Liczba dni"
-            class="input props__days"
-            :disabled="!form.from"
-            min="1"
-            title="Liczba dni"
-            type="number"
-          >
-
-          <span class="props__hint">{{ daysModel === 1 ? 'dzień' : 'dni' }}</span>
-
-          <button
-            v-if="form.to"
-            aria-label="Jeden dzień"
-            class="btn btn--icon btn--sm"
-            title="Jeden dzień"
-            type="button"
-            @click="form.to = null"
-          >
-            <X />
-          </button>
-        </div>
-
-        <label class="props__label" for="task-time">Godzina</label>
-
-        <div class="props__inline">
-          <input
-            id="task-time"
-            v-model="timeModel"
-            class="input"
-            :disabled="!form.from || !!form.to"
-            step="300"
-            :title="form.to ? 'Zadanie na kilka dni trwa całe dni' : (form.from ? undefined : 'Najpierw wybierz dzień')"
-            type="time"
-          >
-
-          <select v-model="form.duration" aria-label="Czas trwania" class="input" :disabled="!form.time">
-            <option :value="null">{{ formatDuration(DEFAULT_DURATION) }} (domyślnie)</option>
-            <option v-for="item in durations" :key="item.value" :value="item.value">{{ item.title }}</option>
-          </select>
-
-          <button
-            v-if="form.time"
-            aria-label="Bez godziny"
-            class="btn btn--icon btn--sm"
-            title="Bez godziny"
-            type="button"
-            @click="form.time = null"
-          >
-            <X />
-          </button>
-        </div>
-
-        <span class="props__label">Priorytet</span>
-
-        <div aria-label="Priorytet" class="seg" role="radiogroup">
-          <button
-            v-for="item in PRIORITIES"
-            :key="item.value"
-            :aria-checked="form.priority === item.value"
-            :class="`p-${item.value}`"
-            role="radio"
-            type="button"
-            @click="form.priority = item.value"
-          >
-            <Flag class="flag" /> {{ item.title }}
-          </button>
-        </div>
-      </div>
-    </template>
+      <TaskActivity class="col--side" :task="editing" />
+    </div>
 
     <template #actions>
       <!-- with changes made the only ways out are saving or dropping them; otherwise, from the right: save, cancel, duplicate, delete -->
@@ -202,6 +207,7 @@
   import { AlertTriangle, Check, Copy, Flag, Plus, Trash2, X } from 'lucide-vue-next'
   import { computed, defineAsyncComponent, nextTick, ref, useTemplateRef, watch } from 'vue'
   import ProjectSelect from '@/components/ProjectSelect.vue'
+  import TaskActivity from '@/components/TaskActivity.vue'
   import BaseDialog from '@/components/ui/BaseDialog.vue'
   import { useNotifyStore } from '@/stores/notify'
   import { useProjectsStore } from '@/stores/projects'
@@ -432,6 +438,30 @@
 </script>
 
 <style scoped>
+/* the task keeps the width the dialog had (560px), the tabs get the rest */
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  gap: 16px 32px;
+  align-items: start;
+}
+
+.col {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .col--side {
+    padding-top: 8px;
+  }
+}
+
 .lead {
   display: grid;
   gap: 2px;

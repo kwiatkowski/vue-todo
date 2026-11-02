@@ -1,4 +1,4 @@
-import type { Area, AreaInput, Project, ProjectInput, Task, TaskInput } from '@/types'
+import type { Area, AreaInput, Project, ProjectInput, Task, TaskActivity, TaskComment, TaskInput } from '@/types'
 import { request } from './client'
 
 export const areasApi = {
@@ -28,4 +28,8 @@ export const tasksApi = {
   create: (input: TaskInput & { title: string }) => request<Task>('POST', 'tasks', input),
   update: (id: number, input: TaskInput) => request<Task>('PATCH', `tasks/${id}`, input),
   remove: (id: number) => request<{ deleted: boolean }>('DELETE', `tasks/${id}`),
+  /** the comments and the history, oldest first */
+  activity: (id: number) => request<TaskActivity>('GET', `tasks/${id}/activity`),
+  comment: (id: number, text: string) => request<TaskComment>('POST', `tasks/${id}/comments`, { text }),
+  removeComment: (id: number, commentId: number) => request<{ deleted: boolean }>('DELETE', `tasks/${id}/comments/${commentId}`),
 }

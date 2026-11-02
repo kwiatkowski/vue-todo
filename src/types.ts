@@ -50,6 +50,38 @@ export interface Task {
   updatedAt: string
 }
 
+/** A comment under a task – plain text, line breaks kept. */
+export interface TaskComment {
+  id: number
+  text: string
+  /** ISO 8601 (UTC) */
+  createdAt: string
+  author: string | null
+}
+
+/** One change of a field in a task's history; `notes` only says it changed (both null), `projectId` holds names. */
+export interface TaskChange {
+  field: 'title' | 'status' | 'projectId' | 'priority' | 'start' | 'due' | 'time' | 'duration' | 'notes'
+  from: string | number | null
+  to: string | number | null
+}
+
+/** One save of a task: its creation, or what one edit changed. */
+export interface TaskEvent {
+  id: number
+  type: 'created' | 'changed'
+  /** ISO 8601 (UTC) */
+  createdAt: string
+  author: string | null
+  changes: TaskChange[]
+}
+
+/** oldest first */
+export interface TaskActivity {
+  comments: TaskComment[]
+  history: TaskEvent[]
+}
+
 export type TaskInput = Partial<Pick<Task, 'title' | 'notes' | 'done' | 'status' | 'start' | 'due' | 'time' | 'duration' | 'priority' | 'projectId' | 'position'>>
 
 export type ProjectInput = Partial<Pick<Project, 'name' | 'color' | 'areaId'>>
