@@ -36,9 +36,11 @@
   import ToastHost from '@/components/ui/ToastHost.vue'
   import { useTabBadge } from '@/composables/tabBadge'
   import { useAreasStore } from '@/stores/areas'
+  import { useNotifyStore } from '@/stores/notify'
   import { useProjectsStore } from '@/stores/projects'
   import { useTasksStore } from '@/stores/tasks'
   import { useUiStore } from '@/stores/ui'
+  import { clearDeepLink, deepLink } from '@/utils/deepLink'
 
   const route = useRoute()
   const ui = useUiStore()
@@ -55,6 +57,29 @@
   // the mobile sidebar closes once you pick something
   watch(() => route.fullPath, () => {
     ui.sidebar = false
+  })
+
+  // a link from outside (the Home Assistant card): the task, or a new one – once the tasks are in
+  const notify = useNotifyStore()
+
+  watch(() => tasks.status, status => {
+    if (status !== 'ready' || (deepLink.taskId === null && !deepLink.newTask)) {
+      return
+    }
+
+    if (deepLink.taskId === null) {
+      ui.newTask()
+    } else {
+      const task = tasks.items.find(item => item.id === deepLink.taskId)
+
+      if (task) {
+        ui.editTask(task)
+      } else {
+        notify.show('Nie ma już takiego zadania – może zostało ukończone albo usunięte.')
+      }
+    }
+
+    clearDeepLink()
   })
 
   onMounted(() => {

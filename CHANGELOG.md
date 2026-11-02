@@ -19,6 +19,7 @@ Aplikacja pokazuje najnowszą sekcję w oknie „Co nowego” (klik w wersję na
 - Dymki w stylu listy projektów – przy komentarzach („3 komentarze – kliknij, aby otworzyć”) i przyciskach menu, zamiast systemowych.
 - Czytelniej: jaśniejszy (w jasnym motywie ciemniejszy) szary tekst, większe pole kliknięcia kółka statusu i etykiet, dymki przy liczbach w panelu, większe drobne teksty w kalendarzu.
 - Spokojniejsza lista: tytuły zadań w toku bez pogrubienia, kategoria przy grupie zawsze wersalikami.
+- Karta „Zadania” w Home Assistant: zadania na dziś z Todo; klik w zadanie otwiera je w Todo, „+” – nowe zadanie.
 
 ## 2026.10.30
 
