@@ -158,6 +158,7 @@ export const useTasksStore = defineStore('tasks', () => {
       position: input.position ?? null,
       createdAt: now,
       updatedAt: now,
+      comments: 0,
     }
 
     items.value.push(draft)
@@ -251,6 +252,15 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
+  /** the comments' count after one was added or removed in the task's dialog */
+  function setComments (id: number, count: number): void {
+    const task = items.value.find(item => item.id === id)
+
+    if (task) {
+      task.comments = count
+    }
+  }
+
   function replace (id: number, task: Task): void {
     const index = items.value.findIndex(item => item.id === id)
 
@@ -259,7 +269,7 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  return { items, status, loadError, open, counts, listFor, dayPlan, load, add, update, setStatus, toggle, remove, detachProject }
+  return { items, status, loadError, open, counts, listFor, dayPlan, load, add, update, setStatus, toggle, remove, detachProject, setComments }
 })
 
 /** The same coupling the server applies: status ⇄ done, no time without a day. */

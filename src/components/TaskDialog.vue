@@ -154,14 +154,17 @@
         </div>
       </div>
 
-      <TaskActivity class="col--side" :task="editing" />
+      <!-- as tall as the task: the tabs scroll inside, the dialog doesn't grow with the comments -->
+      <div class="side">
+        <TaskActivity ref="activityPanel" class="side__panel" :task="editing" />
+      </div>
     </div>
 
     <template #actions>
       <!-- with changes made the only ways out are saving or dropping them; otherwise as in the projects list: delete on
            the left, duplicate, cancel and save on the right -->
-      <template v-if="dirty">
-        <span class="confirm"><AlertTriangle /> Niezapisane zmiany</span>
+      <template v-if="unsaved">
+        <span class="confirm"><AlertTriangle /> {{ dirty ? 'Niezapisane zmiany' : 'Niewysłany komentarz' }}</span>
         <span style="flex: 1" />
         <button class="btn btn--danger btn--sm" type="button" @click="discard">Zamknij bez zapisywania</button>
 
@@ -247,8 +250,11 @@
   const dialog = useTemplateRef<InstanceType<typeof BaseDialog>>('dialog')
 
   const dirty = computed(() => form.value !== null && JSON.stringify(form.value) !== pristine.value)
+  const activityPanel = useTemplateRef<InstanceType<typeof TaskActivity>>('activityPanel')
+  /** changes in the task or a comment typed and not added – both are saved or dropped in the footer */
+  const unsaved = computed(() => dirty.value || (activityPanel.value?.pending ?? false))
   // an edit saves only what changed; a new task or a duplicate can go as it is
-  const canSave = computed(() => !saving.value && (dirty.value || !editing.value))
+  const canSave = computed(() => !saving.value && (unsaved.value || !editing.value))
   const saving = ref(false)
   const titleError = ref(false)
 
@@ -368,7 +374,7 @@
 
   /** ×, Esc and the backdrop close only an untouched form – changes are saved or dropped in the footer */
   function canClose (): boolean {
-    return !dirty.value
+    return !unsaved.value
   }
 
   function discard (): void {
@@ -391,7 +397,9 @@
 
     if (editing.value) {
       saving.value = true
-      const ok = await tasks.update(editing.value.id, { ...data, done: data.status === 'done' })
+      // the task's changes, then the comment typed beside them
+      const ok = (!dirty.value || await tasks.update(editing.value.id, { ...data, done: data.status === 'done' }))
+        && (await activityPanel.value?.flush() ?? true)
       saving.value = false
 
       if (ok) {
@@ -431,13 +439,25 @@
   display: grid;
   grid-template-columns: minmax(0, 390px) minmax(0, 1fr);
   gap: 16px 32px;
-  align-items: start;
 }
 
 .col {
   display: grid;
+  align-content: start;
   gap: 16px;
   min-width: 0;
+}
+
+.side {
+  position: relative;
+  min-width: 0;
+  min-height: 320px;
+}
+
+/* out of the row's height – the task on the left sets it */
+.side__panel {
+  position: absolute;
+  inset: 0;
 }
 
 @media (max-width: 900px) {
@@ -445,8 +465,13 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .col--side {
+  .side {
+    min-height: 0;
     padding-top: 8px;
+  }
+
+  .side__panel {
+    position: static;
   }
 }
 

@@ -48,6 +48,8 @@ export interface Task {
   createdAt: string
   /** ISO 8601 (UTC) */
   updatedAt: string
+  /** how many comments it has */
+  comments: number
 }
 
 /** A comment under a task – plain text, line breaks kept. */
@@ -61,11 +63,22 @@ export interface TaskComment {
   editedAt: string | null
 }
 
-/** One change of a field in a task's history; `notes` only says it changed (both null), `projectId` holds names. */
+/** When a task is – its day (and span), time and duration, as one change in the history. */
+export interface TaskWhen {
+  start: string | null
+  due: string | null
+  time: string | null
+  duration: number | null
+}
+
+/**
+ * One change of a field in a task's history; `notes` only says it changed (both null), `projectId` holds names,
+ * `when` the day, span, time and duration together (start, due, time and duration – saves from before it).
+ */
 export interface TaskChange {
-  field: 'title' | 'status' | 'projectId' | 'priority' | 'start' | 'due' | 'time' | 'duration' | 'notes'
-  from: string | number | null
-  to: string | number | null
+  field: 'title' | 'status' | 'projectId' | 'priority' | 'when' | 'start' | 'due' | 'time' | 'duration' | 'notes'
+  from: string | number | TaskWhen | null
+  to: string | number | TaskWhen | null
 }
 
 /** One save of a task: its creation, what one edit changed, or a comment added or edited (`text` – its start). */

@@ -24,12 +24,16 @@
     <span v-if="task.notes" aria-label="Ma notatki" class="chip" title="Ma notatki">
       <AlignLeft />
     </span>
+
+    <span v-if="task.comments > 0" :aria-label="`Komentarze: ${task.comments}`" class="chip mono" :title="`Komentarze: ${task.comments}`">
+      <MessageSquare /> {{ task.comments }}
+    </span>
   </div>
 </template>
 
 <script lang="ts" setup>
   import type { Task } from '@/types'
-  import { AlignLeft, CalendarDays, CircleDashed, Clock, Flag } from 'lucide-vue-next'
+  import { AlignLeft, CalendarDays, CircleDashed, Clock, Flag, MessageSquare } from 'lucide-vue-next'
   import { computed } from 'vue'
   import { useProjectsStore } from '@/stores/projects'
   import { formatDue, formatSpan, today } from '@/utils/date'
@@ -61,7 +65,8 @@
     || (props.task.time && !props.dueAside)
     || props.task.priority !== 'none'
     || (project.value && props.showProject)
-    || props.task.notes)
+    || props.task.notes
+    || props.task.comments > 0)
 </script>
 
 <style scoped>

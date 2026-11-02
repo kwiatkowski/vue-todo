@@ -15,7 +15,7 @@
       </button>
     </div>
 
-    <p v-if="!task" class="faint">Komentarze i historia pojawią się po dodaniu zadania.</p>
+    <p v-if="!task" class="faint">Aktywność i komentarze pojawią się po dodaniu zadania.</p>
     <p v-else-if="loading && !activity" class="faint">Wczytuję…</p>
     <p v-else-if="!activity" class="faint">Nie udało się wczytać. <button class="link" type="button" @click="load">Spróbuj ponownie</button></p>
 
@@ -48,9 +48,9 @@
         <ul v-else class="feed">
           <li v-for="comment in newestFirst(comments)" :key="comment.id" class="feed__item">
             <div class="feed__head">
-              <span class="feed__who">{{ comment.author ?? 'Ktoś' }}</span>
-              <span class="faint">{{ formatMoment(comment.createdAt) }}</span>
-              <span v-if="comment.editedAt" class="faint" :title="`Edytowany ${formatMoment(comment.editedAt)}`">· edytowany</span>
+              <span v-if="!isMe(comment.author)" class="feed__who">{{ comment.author ?? 'Ktoś' }}</span>
+              <span class="faint" :title="formatMomentFull(comment.createdAt)">{{ formatMoment(comment.createdAt) }}</span>
+              <span v-if="comment.editedAt" class="faint" :title="`Edytowany ${formatMomentFull(comment.editedAt)}`">· edytowany</span>
               <span style="flex: 1" />
 
               <template v-if="editing === comment.id" />
@@ -121,13 +121,13 @@
           <li v-for="event in newestFirst(activity.history)" :key="event.id" class="feed__item">
             <div class="feed__head">
               <span class="feed__who">{{ EVENT_TITLES[event.type] }}</span>
-              <span class="faint">{{ formatMoment(event.createdAt) }}<template v-if="event.author"> · {{ event.author }}</template></span>
+              <span class="faint" :title="formatMomentFull(event.createdAt)">{{ formatMoment(event.createdAt) }}<template v-if="event.author && !isMe(event.author)"> · {{ event.author }}</template></span>
             </div>
 
             <p v-if="event.text" class="feed__text feed__quote">{{ event.text }}</p>
 
             <ul v-if="event.type === 'changed'" class="changes">
-              <li v-for="(change, index) in event.changes.map(describeChange)" :key="index">
+              <li v-for="(change, index) in describeChanges(event.changes)" :key="index">
                 <span class="changes__label">{{ change.label }}:</span>
                 <template v-if="change.from !== null"> <s class="changes__from">{{ change.from }}</s> → </template>
                 <span class="changes__to">{{ change.to }}</span>
@@ -139,7 +139,7 @@
           <li v-if="!activity.history.some(event => event.type === 'created')" class="feed__item">
             <div class="feed__head">
               <span class="feed__who">Utworzone</span>
-              <span class="faint">{{ formatMoment(task.createdAt) }}</span>
+              <span class="faint" :title="formatMomentFull(task.createdAt)">{{ formatMoment(task.createdAt) }}</span>
             </div>
 
             <p v-if="activity.history.length === 0" class="faint feed__text">Zmiany są zapisywane od 2 listopada 2026.</p>
@@ -153,13 +153,18 @@
 <script lang="ts" setup>
   import type { Task, TaskActivity, TaskComment, TaskEvent } from '@/types'
   import type { Component } from 'vue'
-  import { Check, History, MessageSquare, MessageSquarePlus, Pencil, Trash2, X } from 'lucide-vue-next'
+  import { Activity, Check, MessageSquare, MessageSquarePlus, Pencil, Trash2, X } from 'lucide-vue-next'
   import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
   import { tasksApi } from '@/api/todo'
+  import { config } from '@/config'
   import { useNotifyStore } from '@/stores/notify'
-  import { describeChange, formatMoment } from '@/utils/activity'
+  import { useTasksStore } from '@/stores/tasks'
+  import { describeChanges, formatMoment, formatMomentFull } from '@/utils/activity'
 
-  /** The task dialog's right column: comments and the history, in tabs – more tabs can join later. */
+  /**
+   * The task dialog's right column, in tabs – more can join later: the activity (what changed, comments added) and the
+   * comments. Fills its parent and scrolls inside it, so the task on the left stays in view.
+   */
   const props = defineProps<{ task: Task | null }>()
 
   type Tab = 'comments' | 'history'
@@ -167,11 +172,12 @@
   const EVENT_TITLES: Record<TaskEvent['type'], string> = { created: 'Utworzone', changed: 'Zmiana', commented: 'Komentarz', commentEdited: 'Edycja komentarza' }
 
   const TABS: Array<{ key: Tab, label: string, icon: Component }> = [
-    { key: 'history', label: 'Historia', icon: History },
+    { key: 'history', label: 'Aktywność', icon: Activity },
     { key: 'comments', label: 'Komentarze', icon: MessageSquare },
   ]
 
   const notify = useNotifyStore()
+  const tasks = useTasksStore()
   const tab = ref<Tab>('history')
   const activity = ref<TaskActivity | null>(null)
   const loading = ref(false)
@@ -185,6 +191,22 @@
   const editField = useTemplateRef<HTMLTextAreaElement[]>('editField')
 
   const comments = computed(() => activity.value?.comments ?? [])
+
+  /** the app is one person's – their own name isn't repeated on every line */
+  function isMe (author: string | null): boolean {
+    return author !== null && author === config.user?.name
+  }
+
+  /** a comment typed and not added, or an edit not saved – the dialog asks before it closes and saves them with the task */
+  const pending = computed(() => draft.value.trim() !== ''
+    || (editing.value !== null && editText.value.trim() !== (comments.value.find(comment => comment.id === editing.value)?.text ?? '')))
+
+  /** the task's row shows how many comments it has */
+  watch(() => activity.value?.comments.length, count => {
+    if (props.task && count !== undefined) {
+      tasks.setComments(props.task.id, count)
+    }
+  })
 
   function newestFirst<T> (items: T[]): T[] {
     return items.toReversed()
@@ -223,11 +245,11 @@
     void load()
   }, { immediate: true })
 
-  async function addComment (): Promise<void> {
+  async function addComment (): Promise<boolean> {
     const text = draft.value.trim()
 
     if (!props.task || !text || sending.value) {
-      return
+      return !text
     }
 
     sending.value = true
@@ -238,8 +260,12 @@
       draft.value = ''
       // the comment left a line in the history too
       void load()
+
+      return true
     } catch (error) {
       notify.error(error)
+
+      return false
     } finally {
       sending.value = false
     }
@@ -258,12 +284,12 @@
     })
   }
 
-  async function saveEdit (): Promise<void> {
+  async function saveEdit (): Promise<boolean> {
     const id = editing.value
     const text = editText.value.trim()
 
     if (!props.task || !activity.value || id === null || !text || sending.value) {
-      return
+      return id === null
     }
 
     sending.value = true
@@ -274,12 +300,23 @@
       editing.value = null
       // the edit left a line in the history
       void load()
+
+      return true
     } catch (error) {
       notify.error(error)
+
+      return false
     } finally {
       sending.value = false
     }
   }
+
+  /** Saves what is pending – the edit, then the new comment; false when one of them didn't go. */
+  async function flush (): Promise<boolean> {
+    return pending.value ? (await saveEdit()) && (await addComment()) : true
+  }
+
+  defineExpose({ pending, flush })
 
   async function removeComment (id: number): Promise<void> {
     if (!props.task || !activity.value) {
@@ -299,10 +336,11 @@
 
 <style scoped>
 .activity {
-  display: grid;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
   min-width: 0;
+  height: 100%;
 }
 
 /* the tabs as in the project's dialog of the projects list */
@@ -357,9 +395,17 @@
   text-align: center;
 }
 
+/* the tabs stay, the panel scrolls – as tall as the task beside it */
 .tab-panel {
   display: grid;
+  align-content: start;
   gap: 12px;
+  flex: 1;
+  min-height: 0;
+  padding-right: 4px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
 }
 
 p {

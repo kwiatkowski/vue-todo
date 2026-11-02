@@ -19,6 +19,7 @@ function task (id: number, position: number | null, createdAt = '2026-10-01T10:0
     position,
     createdAt,
     updatedAt: createdAt,
+    comments: 0,
     ...extra,
   }
 }

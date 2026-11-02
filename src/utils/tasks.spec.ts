@@ -20,6 +20,7 @@ function task (overrides: Partial<Task> = {}): Task {
     position: null,
     createdAt: '2026-10-01T10:00:00+00:00',
     updatedAt: '2026-10-01T10:00:00+00:00',
+    comments: 0,
     ...overrides,
   }
 }
