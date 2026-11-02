@@ -31,5 +31,6 @@ export const tasksApi = {
   /** the comments and the history, oldest first */
   activity: (id: number) => request<TaskActivity>('GET', `tasks/${id}/activity`),
   comment: (id: number, text: string) => request<TaskComment>('POST', `tasks/${id}/comments`, { text }),
+  editComment: (id: number, commentId: number, text: string) => request<TaskComment>('PATCH', `tasks/${id}/comments/${commentId}`, { text }),
   removeComment: (id: number, commentId: number) => request<{ deleted: boolean }>('DELETE', `tasks/${id}/comments/${commentId}`),
 }

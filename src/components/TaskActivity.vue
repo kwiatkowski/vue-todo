@@ -50,40 +50,81 @@
             <div class="feed__head">
               <span class="feed__who">{{ comment.author ?? 'Ktoś' }}</span>
               <span class="faint">{{ formatMoment(comment.createdAt) }}</span>
+              <span v-if="comment.editedAt" class="faint" :title="`Edytowany ${formatMoment(comment.editedAt)}`">· edytowany</span>
               <span style="flex: 1" />
 
-              <template v-if="removing === comment.id">
+              <template v-if="editing === comment.id" />
+
+              <template v-else-if="removing === comment.id">
                 <span class="feed__ask">Usunąć?</span>
                 <button class="btn btn--danger btn--sm" type="button" @click="removeComment(comment.id)"><Trash2 /> Usuń</button>
                 <button class="btn btn--sm" type="button" @click="removing = null">Nie</button>
               </template>
 
-              <button
-                v-else
-                aria-label="Usuń komentarz"
-                class="btn btn--icon btn--sm feed__remove"
-                title="Usuń komentarz"
-                type="button"
-                @click="removing = comment.id"
-              >
-                <Trash2 />
-              </button>
+              <template v-else>
+                <button
+                  aria-label="Edytuj komentarz"
+                  class="btn btn--icon btn--sm feed__tool"
+                  title="Edytuj komentarz"
+                  type="button"
+                  @click="startEdit(comment)"
+                >
+                  <Pencil />
+                </button>
+
+                <button
+                  aria-label="Usuń komentarz"
+                  class="btn btn--icon btn--sm feed__tool"
+                  title="Usuń komentarz"
+                  type="button"
+                  @click="removing = comment.id"
+                >
+                  <Trash2 />
+                </button>
+              </template>
             </div>
 
-            <p class="feed__text">{{ comment.text }}</p>
+            <!-- editing in place: Ctrl+Enter saves, Esc drops the change (and leaves the dialog open) -->
+            <div v-if="editing === comment.id" class="compose">
+              <textarea
+                ref="editField"
+                v-model="editText"
+                aria-label="Treść komentarza"
+                class="input compose__field"
+                maxlength="5000"
+                rows="5"
+                @keydown.enter.ctrl.prevent.stop="saveEdit"
+                @keydown.enter.meta.prevent.stop="saveEdit"
+                @keydown.esc.prevent.stop="editing = null"
+              />
+
+              <div class="compose__actions">
+                <span class="faint compose__hint">Ctrl+Enter</span>
+
+                <button class="btn btn--sm" type="button" @click="editing = null">
+                  <X /> Anuluj
+                </button>
+
+                <button class="btn btn--accent btn--sm" :disabled="!editText.trim() || sending" type="button" @click="saveEdit">
+                  <Check /> Zapisz
+                </button>
+              </div>
+            </div>
+
+            <p v-else class="feed__text">{{ comment.text }}</p>
           </li>
         </ul>
       </div>
 
       <div v-show="tab === 'history'" class="tab-panel" role="tabpanel">
-        <ul class="feed">
+        <ul class="feed feed--history">
           <li v-for="event in newestFirst(activity.history)" :key="event.id" class="feed__item">
             <div class="feed__head">
               <span class="feed__who">{{ EVENT_TITLES[event.type] }}</span>
               <span class="faint">{{ formatMoment(event.createdAt) }}<template v-if="event.author"> · {{ event.author }}</template></span>
             </div>
 
-            <p v-if="event.type === 'commented' && event.text" class="feed__text feed__quote">{{ event.text }}</p>
+            <p v-if="event.text" class="feed__text feed__quote">{{ event.text }}</p>
 
             <ul v-if="event.type === 'changed'" class="changes">
               <li v-for="(change, index) in event.changes.map(describeChange)" :key="index">
@@ -110,10 +151,10 @@
 </template>
 
 <script lang="ts" setup>
-  import type { Task, TaskActivity, TaskEvent } from '@/types'
+  import type { Task, TaskActivity, TaskComment, TaskEvent } from '@/types'
   import type { Component } from 'vue'
-  import { History, MessageSquare, MessageSquarePlus, Trash2 } from 'lucide-vue-next'
-  import { computed, ref, watch } from 'vue'
+  import { Check, History, MessageSquare, MessageSquarePlus, Pencil, Trash2, X } from 'lucide-vue-next'
+  import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
   import { tasksApi } from '@/api/todo'
   import { useNotifyStore } from '@/stores/notify'
   import { describeChange, formatMoment } from '@/utils/activity'
@@ -123,7 +164,7 @@
 
   type Tab = 'comments' | 'history'
 
-  const EVENT_TITLES: Record<TaskEvent['type'], string> = { created: 'Utworzone', changed: 'Zmiana', commented: 'Komentarz' }
+  const EVENT_TITLES: Record<TaskEvent['type'], string> = { created: 'Utworzone', changed: 'Zmiana', commented: 'Komentarz', commentEdited: 'Edycja komentarza' }
 
   const TABS: Array<{ key: Tab, label: string, icon: Component }> = [
     { key: 'comments', label: 'Komentarze', icon: MessageSquare },
@@ -138,6 +179,10 @@
   const sending = ref(false)
   /** the comment asking "Usunąć?" */
   const removing = ref<number | null>(null)
+  /** the comment being edited, and its text as typed */
+  const editing = ref<number | null>(null)
+  const editText = ref('')
+  const editField = useTemplateRef<HTMLTextAreaElement[]>('editField')
 
   const comments = computed(() => activity.value?.comments ?? [])
 
@@ -173,6 +218,7 @@
     activity.value = null
     draft.value = ''
     removing.value = null
+    editing.value = null
     tab.value = 'comments'
     void load()
   }, { immediate: true })
@@ -191,6 +237,42 @@
       activity.value?.comments.push(comment)
       draft.value = ''
       // the comment left a line in the history too
+      void load()
+    } catch (error) {
+      notify.error(error)
+    } finally {
+      sending.value = false
+    }
+  }
+
+  function startEdit (comment: TaskComment): void {
+    removing.value = null
+    editing.value = comment.id
+    editText.value = comment.text
+
+    // the field under the cursor's end
+    void nextTick(() => {
+      const field = editField.value?.[0]
+      field?.focus()
+      field?.setSelectionRange(field.value.length, field.value.length)
+    })
+  }
+
+  async function saveEdit (): Promise<void> {
+    const id = editing.value
+    const text = editText.value.trim()
+
+    if (!props.task || !activity.value || id === null || !text || sending.value) {
+      return
+    }
+
+    sending.value = true
+
+    try {
+      const saved = await tasksApi.editComment(props.task.id, id, text)
+      activity.value.comments = activity.value.comments.map(comment => comment.id === id ? saved : comment)
+      editing.value = null
+      // the edit left a line in the history
       void load()
     } catch (error) {
       notify.error(error)
@@ -332,6 +414,12 @@ p {
   font-size: 13px;
 }
 
+/* the history starts right under the tabs – no second line there */
+.feed--history > .feed__item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
 .feed__head {
   display: flex;
   align-items: center;
@@ -351,18 +439,18 @@ p {
   font-weight: 500;
 }
 
-/* the bin shows on the comment pointed at (always on touch) */
-.feed__remove {
+/* the pencil and the bin show on the comment pointed at (always on touch) */
+.feed__tool {
   opacity: 0;
 }
 
-.feed__item:hover .feed__remove,
-.feed__remove:focus-visible {
+.feed__item:hover .feed__tool,
+.feed__tool:focus-visible {
   opacity: 1;
 }
 
 @media (hover: none) {
-  .feed__remove {
+  .feed__tool {
     opacity: 1;
   }
 }
@@ -388,6 +476,7 @@ p {
 }
 
 .changes__label {
+  margin-right: 4px;
   color: var(--text-2);
 }
 

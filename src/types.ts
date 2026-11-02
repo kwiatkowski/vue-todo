@@ -57,6 +57,8 @@ export interface TaskComment {
   /** ISO 8601 (UTC) */
   createdAt: string
   author: string | null
+  /** ISO 8601 (UTC) – the last edit; null = never edited */
+  editedAt: string | null
 }
 
 /** One change of a field in a task's history; `notes` only says it changed (both null), `projectId` holds names. */
@@ -66,10 +68,10 @@ export interface TaskChange {
   to: string | number | null
 }
 
-/** One save of a task: its creation, what one edit changed, or a comment added (`text` – its start). */
+/** One save of a task: its creation, what one edit changed, or a comment added or edited (`text` – its start). */
 export interface TaskEvent {
   id: number
-  type: 'created' | 'changed' | 'commented'
+  type: 'created' | 'changed' | 'commented' | 'commentEdited'
   /** ISO 8601 (UTC) */
   createdAt: string
   author: string | null
