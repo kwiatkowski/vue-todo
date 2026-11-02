@@ -1,12 +1,11 @@
 <template>
   <div class="notes-field">
-    <!-- with a label: a field label above the box, the tools at its right only while editing – the row keeps its height -->
+    <!-- with a label: a field label above the box, the tools in its place while editing – the row keeps its height -->
     <div v-if="label" class="notes__head">
-      <span class="notes__label" @click="editor?.commands.focus('end')">{{ label }}</span>
+      <span v-if="!focused || !editor" class="notes__label" @click="editor?.commands.focus('end')">{{ label }}</span>
 
       <div
-        v-if="editor"
-        v-show="focused"
+        v-else
         aria-label="Formatowanie"
         class="notes__tools"
         role="toolbar"
@@ -151,8 +150,6 @@
 .notes__head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
   min-height: 28px;
 }
 
@@ -166,6 +163,8 @@
 .notes__tools {
   display: flex;
   gap: 2px;
+  /* the first icon under the label's first letter */
+  margin-left: -6px;
 }
 
 .notes__tool {

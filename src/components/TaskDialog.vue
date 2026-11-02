@@ -27,7 +27,7 @@
 
           <span v-if="titleError" class="error-text">Zadanie musi mieć tytuł.</span>
 
-          <NotesEditor v-model="form.notes" class="notes" label="Opis zadania" :max-length="5000" />
+          <NotesEditor v-model="form.notes" class="description" label="Opis zadania" :max-length="5000" />
         </div>
 
         <div class="props">
@@ -455,7 +455,7 @@
   gap: 2px;
 }
 
-.notes {
+.description {
   margin-top: 4px;
 }
 
