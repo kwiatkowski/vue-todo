@@ -40,7 +40,13 @@
         <TaskProjectPicker v-if="editable && showProject" class="row__project" :task="task" />
       </div>
 
-      <TaskMeta :due-aside="editable" :show-due="showDue" :show-project="showProject && !editable" :task="task" />
+      <TaskMeta
+        :due-aside="editable"
+        :editable="editable"
+        :show-due="showDue"
+        :show-project="showProject && !editable"
+        :task="task"
+      />
     </div>
 
     <div v-if="editable && due" class="row__due" :class="dueClass">

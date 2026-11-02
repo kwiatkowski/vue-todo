@@ -16,6 +16,8 @@
     <RemoveTaskDialog />
     <ChangelogDialog />
     <ToastHost />
+    <!-- v-tip's tooltip, one for the whole app (as in the projects list) -->
+    <TipLayer />
   </div>
 </template>
 
@@ -30,6 +32,7 @@
   import ProjectDialog from '@/components/ProjectDialog.vue'
   import RemoveTaskDialog from '@/components/RemoveTaskDialog.vue'
   import TaskDialog from '@/components/TaskDialog.vue'
+  import TipLayer from '@/components/ui/TipLayer.vue'
   import ToastHost from '@/components/ui/ToastHost.vue'
   import { useTabBadge } from '@/composables/tabBadge'
   import { useAreasStore } from '@/stores/areas'

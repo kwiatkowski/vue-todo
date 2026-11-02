@@ -15,6 +15,8 @@ Aplikacja pokazuje najnowszą sekcję w oknie „Co nowego” (klik w wersję na
 - Tytuł strony (Plan, projekt, kategoria) na górnej belce, nad początkiem listy – więcej miejsca na zadania.
 - Liczby przy zakładkach (Dziś, Jutro, tygodnie, Komentarze) w jednym stylu – zielony znaczek, czerwony przy zaległych.
 - Bez etykiety „W toku” na liście – status pokazuje kółko na początku wiersza.
+- Klik w priorytet na liście otwiera wybór priorytetu (jak status i projekt).
+- Dymki w stylu listy projektów – przy komentarzach („3 komentarze – kliknij, aby otworzyć”) i przyciskach menu, zamiast systemowych.
 
 ## 2026.10.30
 

@@ -2,11 +2,11 @@
   <div class="menu" @click.stop>
     <button
       ref="trigger"
+      v-tip="label"
       :aria-expanded="open"
       aria-haspopup="menu"
       :aria-label="label"
       :class="triggerClass"
-      :title="label"
       type="button"
       @click="toggle"
     >
@@ -32,6 +32,7 @@
 <script lang="ts" setup>
   import { Ellipsis } from 'lucide-vue-next'
   import { nextTick, onBeforeUnmount, ref, useTemplateRef } from 'vue'
+  import { vTip } from '@/directives/tip'
 
   /**
    * A "…" button with a small menu; items are `<button class="menu__item">` in the default slot.

@@ -10,7 +10,10 @@
       <Clock /> {{ formatRange(task.time, task.duration) }}
     </span>
 
-    <span v-if="task.priority !== 'none'" class="chip" :class="`p-${task.priority} flag`">
+    <!-- in a list's row a click on the priority picks another one -->
+    <TaskPriorityPicker v-if="task.priority !== 'none' && editable" :task="task" />
+
+    <span v-else-if="task.priority !== 'none'" class="chip" :class="`p-${task.priority} flag`">
       <Flag /> {{ priorityTitle(task.priority) }}
     </span>
 
@@ -25,9 +28,9 @@
     <!-- straight to the comments of the task -->
     <button
       v-if="task.comments > 0"
-      :aria-label="`Komentarze: ${task.comments} – pokaż`"
+      v-tip="`${commentsLabel(task.comments)} – kliknij, aby otworzyć`"
+      :aria-label="`${commentsLabel(task.comments)} – pokaż`"
       class="chip chip--link mono"
-      :title="`Komentarze: ${task.comments}`"
       type="button"
       @click.stop="ui.editTask(task, 'comments')"
     >
@@ -40,6 +43,8 @@
   import type { Task } from '@/types'
   import { AlignLeft, CalendarDays, Clock, Flag, MessageSquare } from 'lucide-vue-next'
   import { computed } from 'vue'
+  import TaskPriorityPicker from '@/components/TaskPriorityPicker.vue'
+  import { vTip } from '@/directives/tip'
   import { useProjectsStore } from '@/stores/projects'
   import { useUiStore } from '@/stores/ui'
   import { formatDue, formatSpan, today } from '@/utils/date'
@@ -53,10 +58,21 @@
     showDue?: boolean
     /** the row shows the due date itself, in its right-hand column */
     dueAside?: boolean
+    /** a list's row: the priority can be changed from the chip */
+    editable?: boolean
   }>(), { showProject: true, showDue: true })
 
   const projects = useProjectsStore()
   const ui = useUiStore()
+
+  /** "1 komentarz", "3 komentarze", "12 komentarzy" */
+  function commentsLabel (count: number): string {
+    const rest10 = count % 10
+    const rest100 = count % 100
+    const word = count === 1 ? 'komentarz' : (rest10 >= 2 && rest10 <= 4 && (rest100 < 12 || rest100 > 14) ? 'komentarze' : 'komentarzy')
+
+    return `${count} ${word}`
+  }
   const project = computed(() => projects.byId(props.task.projectId))
 
   const dueClass = computed(() => {

@@ -8,6 +8,9 @@
     @click="onBackdrop"
     @pointerdown="onPointerDown"
   >
+    <!-- the tooltips of what is inside go here – a modal dialog covers everything in <body> (utils/tip) -->
+    <div class="dialog__layer" />
+
     <form v-if="open" class="dialog__card" novalidate @submit.prevent="emit('submit')">
       <header class="dialog__head">
         <h2 :id="titleId" class="dialog__title">{{ title }}</h2>
@@ -111,6 +114,11 @@
     opacity: 0;
     transform: translateY(6px) scale(.985);
   }
+}
+
+/* no box of its own – the tooltips in it are placed as anywhere else */
+.dialog__layer {
+  display: contents;
 }
 
 .dialog__card {
