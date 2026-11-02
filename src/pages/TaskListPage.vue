@@ -56,11 +56,7 @@
         :to="{ name: tab.name }"
       >
         {{ tab.title }}
-        <span
-          v-if="tab.count"
-          class="tabs__count mono"
-          :class="{ 'tabs__count--overdue': tab.overdue }"
-        >{{ tab.count }}</span>
+        <span v-if="tab.count" class="count" :class="{ 'count--late': tab.overdue }">{{ tab.count }}</span>
       </RouterLink>
     </nav>
 
@@ -438,7 +434,7 @@
 .tabs__tab {
   flex: none;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
   margin-bottom: -1px;
   padding: 8px 12px;
@@ -456,15 +452,6 @@
   border-bottom-color: var(--text);
   color: var(--text);
   font-weight: 500;
-}
-
-.tabs__count {
-  color: var(--text-3);
-  font-size: 11.5px;
-}
-
-.tabs__count--overdue {
-  color: var(--danger);
 }
 
 .add {

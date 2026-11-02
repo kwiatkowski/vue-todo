@@ -11,7 +11,7 @@
         @click="tab = item.key"
       >
         <component :is="item.icon" /> {{ item.label }}
-        <span v-if="item.key === 'comments' && comments.length > 0" class="tabs__count mono">{{ comments.length }}</span>
+        <span v-if="item.key === 'comments' && comments.length > 0" class="count">{{ comments.length }}</span>
       </button>
     </div>
 
@@ -385,18 +385,6 @@
 .tabs__tab[aria-selected='true'] {
   border-bottom-color: var(--accent);
   color: var(--text);
-}
-
-.tabs__count {
-  min-width: 18px;
-  padding: 0 5px;
-  border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  color: var(--accent-text);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 17px;
-  text-align: center;
 }
 
 /* the tabs stay, the panel scrolls – as tall as the task beside it */
