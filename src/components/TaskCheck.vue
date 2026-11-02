@@ -63,6 +63,14 @@
 </script>
 
 <style scoped>
+/* the circle stays 18 px, the area that takes the click is 26 px (WCAG 2.2: at least 24) */
+.check::after {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  content: '';
+}
+
 .check {
   position: relative;
   flex: none;

@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page" :class="{ 'page--list': layout === 'list' }">
     <PageHeader
       :color="project?.color"
       :eyebrow="eyebrow"
@@ -486,9 +486,18 @@
   text-transform: uppercase;
 }
 
+/* the group's category – one style whatever the name's case: small capitals, like the sidebar's headings */
 .group span:last-child {
-  font-weight: 400;
-  font-size: 12px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* a list reads better not too wide – the day stays near the title on a wide screen */
+.page--list {
+  max-width: 1100px;
 }
 
 .done-toggle {

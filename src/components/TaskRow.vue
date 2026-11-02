@@ -205,10 +205,6 @@
   background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.row--doing .row__title {
-  font-weight: 550;
-}
-
 .row__project {
   margin-left: 4px;
 }

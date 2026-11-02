@@ -22,7 +22,8 @@
 
   --text: #1c1b18;
   --text-2: #5f5c54;
-  --text-3: #918d82;
+  /* the faintest text – still 4.5:1 (WCAG) on the background, the cards and an "in progress" row */
+  --text-3: #6f6c64;
 
   --accent: #56731c;
   --accent-ink: #fffefb;
@@ -69,7 +70,7 @@
 
     --text: #ecebe6;
     --text-2: #aaa79e;
-    --text-3: #77746b;
+    --text-3: #918e85;
 
     --accent: #a6c46a;
     --accent-ink: #151513;
@@ -101,7 +102,7 @@
 
   --text: #ecebe6;
   --text-2: #aaa79e;
-  --text-3: #77746b;
+  --text-3: #918e85;
 
   --accent: #a6c46a;
   --accent-ink: #151513;

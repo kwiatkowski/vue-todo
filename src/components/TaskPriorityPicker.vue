@@ -57,7 +57,15 @@
 }
 
 .priority .chip {
+  position: relative;
   cursor: pointer;
+}
+
+/* 20 px high, clicks taken 2 px over and under it – 24 px */
+.priority .chip::after {
+  position: absolute;
+  inset: -2px 0;
+  content: '';
 }
 
 .flag,

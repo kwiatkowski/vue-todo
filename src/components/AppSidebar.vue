@@ -24,9 +24,9 @@
 
           <span
             v-if="item.count || item.always"
+            v-tip="item.hot && tasks.counts.overdue > 0 ? `W tym zaległe: ${tasks.counts.overdue}` : undefined"
             class="side__count mono"
             :class="{ 'side__count--hot': item.hot, 'side__count--overdue': item.hot && tasks.counts.overdue > 0 }"
-            :title="item.hot && tasks.counts.overdue > 0 ? `W tym zaległe: ${tasks.counts.overdue}` : undefined"
           >{{ item.count }}</span>
         </RouterLink>
       </div>
@@ -46,6 +46,7 @@
       >
         <!-- the whole heading folds the category (the actions on the right do their own thing) -->
         <div
+          v-tip="group.area ? (isCollapsed(group.area) ? 'Rozwiń' : 'Zwiń') : undefined"
           :aria-expanded="group.area ? !isCollapsed(group.area) : undefined"
           :aria-label="group.area ? `${group.area.name} – ${isCollapsed(group.area) ? 'rozwiń' : 'zwiń'}` : undefined"
           class="side__heading"
@@ -53,7 +54,6 @@
           :draggable="group.area ? 'true' : undefined"
           :role="group.area ? 'button' : undefined"
           :tabindex="group.area ? 0 : undefined"
-          :title="group.area ? (isCollapsed(group.area) ? 'Rozwiń' : 'Zwiń') : undefined"
           @click="group.area && toggleArea(group.area)"
           @dragend="dragging = null; drop = null"
           @dragstart="group.area && onAreaDragStart($event, group.area)"
@@ -84,8 +84,8 @@
           <!-- collapsed: what its projects add up to -->
           <span
             v-if="group.area && isCollapsed(group.area) && summary(group.projects).total > 0"
+            v-tip="summaryHint(group.projects)"
             class="side__count side__count--area mono"
-            :title="summaryHint(group.projects)"
           >
             <span
               v-if="summary(group.projects).today > 0"
@@ -166,8 +166,8 @@
 
               <span
                 v-if="tasks.counts.byProject.get(project.id)"
+                v-tip="todayHint(project.id)"
                 class="side__count mono"
-                :title="todayHint(project.id)"
               >
                 <span
                   v-if="tasks.counts.todayByProject.get(project.id)"
@@ -240,6 +240,7 @@
   import { computed, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import DropMenu from '@/components/ui/DropMenu.vue'
+  import { vTip } from '@/directives/tip'
   import { useAreasStore } from '@/stores/areas'
   import { useProjectsStore } from '@/stores/projects'
   import { useTasksStore } from '@/stores/tasks'

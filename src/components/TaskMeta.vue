@@ -93,9 +93,17 @@
 
 <style scoped>
 .chip--link {
+  position: relative;
   border: 0;
   background: transparent;
   cursor: pointer;
+}
+
+/* the chip is 20 px high, it takes clicks 2 px over and under it – 24 px */
+.chip--link::after {
+  position: absolute;
+  inset: -2px 0;
+  content: '';
 }
 
 .chip--link:hover {

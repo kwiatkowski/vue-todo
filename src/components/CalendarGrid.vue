@@ -512,7 +512,7 @@
 .cal__allday-label {
   padding: 10px 0 10px 8px;
   color: var(--accent-text);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: .04em;
@@ -654,7 +654,7 @@
   top: -8px;
   left: -52px;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -709,7 +709,7 @@
   border-radius: 4px;
   background: var(--danger);
   color: #fff;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -731,7 +731,7 @@
   border-radius: 4px;
   background: var(--accent);
   color: var(--accent-ink);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -808,7 +808,7 @@
 
 .block__time {
   color: var(--text-2);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
