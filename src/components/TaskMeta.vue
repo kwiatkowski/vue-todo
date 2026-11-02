@@ -25,9 +25,17 @@
       <AlignLeft />
     </span>
 
-    <span v-if="task.comments > 0" :aria-label="`Komentarze: ${task.comments}`" class="chip mono" :title="`Komentarze: ${task.comments}`">
+    <!-- straight to the comments of the task -->
+    <button
+      v-if="task.comments > 0"
+      :aria-label="`Komentarze: ${task.comments} – pokaż`"
+      class="chip chip--link mono"
+      :title="`Komentarze: ${task.comments}`"
+      type="button"
+      @click.stop="ui.editTask(task, 'comments')"
+    >
       <MessageSquare /> {{ task.comments }}
-    </span>
+    </button>
   </div>
 </template>
 
@@ -36,6 +44,7 @@
   import { AlignLeft, CalendarDays, CircleDashed, Clock, Flag, MessageSquare } from 'lucide-vue-next'
   import { computed } from 'vue'
   import { useProjectsStore } from '@/stores/projects'
+  import { useUiStore } from '@/stores/ui'
   import { formatDue, formatSpan, today } from '@/utils/date'
   import { formatRange } from '@/utils/day'
   import { isOverdue, occursOn, priorityTitle } from '@/utils/tasks'
@@ -50,6 +59,7 @@
   }>(), { showProject: true, showDue: true })
 
   const projects = useProjectsStore()
+  const ui = useUiStore()
   const project = computed(() => projects.byId(props.task.projectId))
 
   const dueClass = computed(() => {
@@ -70,6 +80,17 @@
 </script>
 
 <style scoped>
+.chip--link {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.chip--link:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;

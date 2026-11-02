@@ -156,7 +156,7 @@
 
       <!-- as tall as the task: the tabs scroll inside, the dialog doesn't grow with the comments -->
       <div class="side">
-        <TaskActivity ref="activityPanel" class="side__panel" :task="editing" />
+        <TaskActivity ref="activityPanel" class="side__panel" :open-on="ui.task?.tab" :task="editing" />
       </div>
     </div>
 

@@ -92,6 +92,9 @@ export interface TaskEvent {
   text: string | null
 }
 
+/** the tabs of the task dialog's right column */
+export type TaskTab = 'history' | 'comments'
+
 /** oldest first */
 export interface TaskActivity {
   comments: TaskComment[]

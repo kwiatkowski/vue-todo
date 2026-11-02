@@ -151,7 +151,7 @@
 </template>
 
 <script lang="ts" setup>
-  import type { Task, TaskActivity, TaskComment, TaskEvent } from '@/types'
+  import type { Task, TaskActivity, TaskComment, TaskEvent, TaskTab } from '@/types'
   import type { Component } from 'vue'
   import { Activity, Check, MessageSquare, MessageSquarePlus, Pencil, Trash2, X } from 'lucide-vue-next'
   import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
@@ -165,9 +165,13 @@
    * The task dialog's right column, in tabs – more can join later: the activity (what changed, comments added) and the
    * comments. Fills its parent and scrolls inside it, so the task on the left stays in view.
    */
-  const props = defineProps<{ task: Task | null }>()
+  const props = defineProps<{
+    task: Task | null
+    /** the tab it opens on – the activity unless asked otherwise (the comments' count on the list opens the comments) */
+    openOn?: TaskTab
+  }>()
 
-  type Tab = 'comments' | 'history'
+  type Tab = TaskTab
 
   const EVENT_TITLES: Record<TaskEvent['type'], string> = { created: 'Utworzone', changed: 'Zmiana', commented: 'Komentarz', commentEdited: 'Edycja komentarza' }
 
@@ -178,7 +182,7 @@
 
   const notify = useNotifyStore()
   const tasks = useTasksStore()
-  const tab = ref<Tab>('history')
+  const tab = ref<Tab>(props.openOn ?? 'history')
   const activity = ref<TaskActivity | null>(null)
   const loading = ref(false)
   const draft = ref('')
@@ -241,7 +245,7 @@
     draft.value = ''
     removing.value = null
     editing.value = null
-    tab.value = 'history'
+    tab.value = props.openOn ?? 'history'
     void load()
   }, { immediate: true })
 

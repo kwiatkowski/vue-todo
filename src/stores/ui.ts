@@ -1,4 +1,4 @@
-import type { Area, Project, Task, TaskInput } from '@/types'
+import type { Area, Project, Task, TaskInput, TaskTab } from '@/types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { duplicateOf } from '@/utils/order'
@@ -11,8 +11,8 @@ import { useTasksStore } from './tasks'
 export const useUiStore = defineStore('ui', () => {
   const sidebar = ref(false)
 
-  /** existing task to edit, or defaults for a new one – `source` when the new one is a duplicate */
-  const task = ref<{ task: Task | null, defaults: TaskInput, source?: Task } | null>(null)
+  /** existing task to edit, or defaults for a new one – `source` when the new one is a duplicate, `tab` the right column's tab to open on */
+  const task = ref<{ task: Task | null, defaults: TaskInput, source?: Task, tab?: TaskTab } | null>(null)
   const project = ref<{ project: Project | null, areaId: number | null } | null>(null)
   const area = ref<{ area: Area | null } | null>(null)
   /** what is being copied – the copy dialog is open while set */
@@ -20,8 +20,8 @@ export const useUiStore = defineStore('ui', () => {
   /** the task waiting for "really delete?" – the confirmation is open while set */
   const removing = ref<Task | null>(null)
 
-  function editTask (value: Task): void {
-    task.value = { task: value, defaults: {} }
+  function editTask (value: Task, tab?: TaskTab): void {
+    task.value = { task: value, defaults: {}, tab }
   }
 
   function newTask (defaults: TaskInput = {}): void {
