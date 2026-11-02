@@ -4,7 +4,7 @@
     v-model="open"
     :can-close="canClose"
     :title="editing ? 'Zadanie' : (source ? 'Duplikuj zadanie' : 'Nowe zadanie')"
-    :width="1080"
+    :width="1360"
     @submit="save"
   >
     <!-- two columns: the task on the left, its comments and history (tabs, more to come) on the right -->
@@ -112,7 +112,7 @@
             <input
               id="task-time"
               v-model="timeModel"
-              class="input"
+              class="input props__time"
               :disabled="!form.from || !!form.to"
               step="300"
               :title="form.to ? 'Zadanie na kilka dni trwa całe dni' : (form.from ? undefined : 'Najpierw wybierz dzień')"
@@ -426,10 +426,10 @@
 </script>
 
 <style scoped>
-/* the task keeps the width the dialog had (560px), the tabs get the rest */
+/* as in the projects list's project dialog: the task in a narrow column (390px), the tabs get the rest */
 .cols {
   display: grid;
-  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 390px) minmax(0, 1fr);
   gap: 16px 32px;
   align-items: start;
 }
@@ -461,7 +461,7 @@
 
 .props {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
   align-items: center;
   gap: 10px 12px;
   padding-top: 16px;
@@ -484,6 +484,11 @@
   min-width: 0;
 }
 
+.props__inline .props__time {
+  /* the time takes what it needs, the duration (with "domyślnie") the rest */
+  flex: 0 0 112px;
+}
+
 .props__inline .props__days {
   flex: 0 0 64px;
   text-align: right;
@@ -496,15 +501,17 @@
   white-space: nowrap;
 }
 
-/* status and priority span the whole row, the options share it evenly */
+/* status and priority span the whole row – each option as wide as its words, the room left shared; in one line */
 .props .seg {
   display: flex;
-  flex-wrap: wrap;
 }
 
 .props .seg button {
-  flex: 1;
+  flex: 1 1 auto;
   justify-content: center;
+  gap: 5px;
+  padding: 0 6px;
+  white-space: nowrap;
 }
 
 .flag {
