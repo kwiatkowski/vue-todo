@@ -12,6 +12,7 @@ Aplikacja pokazuje najnowszą sekcję w oknie „Co nowego” (klik w wersję na
 - „Opis zadania” jako zwykła etykieta – narzędzia formatowania pojawiają się w jej miejscu dopiero przy pisaniu.
 - Stopka okna jak w liście projektów: „Usuń” z lewej, bez daty dodania.
 - Okno „Co nowego” z podsumowaniem zmian dnia – samo po nowej wersji, ręcznie z wersji na górnej belce.
+- Tytuł strony (Plan, projekt, kategoria) na górnej belce, nad początkiem listy – więcej miejsca na zadania.
 
 ## 2026.10.30
 

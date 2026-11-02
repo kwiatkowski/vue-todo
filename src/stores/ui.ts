@@ -1,4 +1,5 @@
 import type { Area, Project, Task, TaskInput, TaskTab } from '@/types'
+import type { Component } from 'vue'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { duplicateOf } from '@/utils/order'
@@ -19,6 +20,8 @@ export const useUiStore = defineStore('ui', () => {
   const copying = ref<{ kind: 'area', item: Area } | { kind: 'project', item: Project } | null>(null)
   /** the task waiting for "really delete?" – the confirmation is open while set */
   const removing = ref<Task | null>(null)
+  /** the page's title – shown on the top bar, above the list's left edge (PageHeader sets it) */
+  const page = ref<{ title: string, eyebrow?: string, color?: string, icon?: Component } | null>(null)
   /** "Co nowego" – the changes of the day's version */
   const changelog = ref(false)
 
@@ -55,5 +58,5 @@ export const useUiStore = defineStore('ui', () => {
     removing.value = value
   }
 
-  return { sidebar, task, project, area, copying, removing, changelog, editTask, newTask, duplicateTask, editProject, editArea, copyArea, copyProject, removeTask }
+  return { sidebar, task, project, area, copying, removing, changelog, page, editTask, newTask, duplicateTask, editProject, editArea, copyArea, copyProject, removeTask }
 })

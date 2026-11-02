@@ -1,25 +1,36 @@
 <template>
   <!-- the same bar as the list of projects – one family of apps: the brand and the version on the left, actions and the account on the right -->
   <header class="top">
-    <button aria-label="Menu" class="btn btn--icon btn--sm top__menu" type="button" @click="ui.sidebar = true">
-      <Menu />
-    </button>
+    <!-- as wide as the sidebar – the page's title starts where the list does -->
+    <div class="top__start">
+      <button aria-label="Menu" class="btn btn--icon btn--sm top__menu" type="button" @click="ui.sidebar = true">
+        <Menu />
+      </button>
 
-    <RouterLink class="top__brand" :to="{ name: 'plan' }">
-      <span aria-hidden="true" class="top__logo"><Check :stroke-width="3" /></span>
-      <span class="top__site">Todo</span>
-    </RouterLink>
+      <RouterLink class="top__brand" :to="{ name: 'plan' }">
+        <span aria-hidden="true" class="top__logo"><Check :stroke-width="3" /></span>
+        <span class="top__site">Todo</span>
+      </RouterLink>
 
-    <!-- the plugin's version (RRRR.MM.DD[.N]) – which build of the app this is; a click shows what's new -->
-    <button
-      v-if="config.version"
-      class="top__version mono"
-      title="Co nowego"
-      type="button"
-      @click="ui.changelog = true"
-    >
-      {{ config.version }}
-    </button>
+      <!-- the plugin's version (RRRR.MM.DD[.N]) – which build of the app this is; a click shows what's new -->
+      <button
+        v-if="config.version"
+        class="top__version mono"
+        title="Co nowego"
+        type="button"
+        @click="ui.changelog = true"
+      >
+        {{ config.version }}
+      </button>
+    </div>
+
+    <!-- the page's title, its day or category after it -->
+    <h1 v-if="ui.page" class="top__title">
+      <span v-if="ui.page.color" class="top__dot" :style="{ background: ui.page.color }" />
+      <component :is="ui.page.icon" v-else-if="ui.page.icon" class="top__icon" />
+      <span class="top__page">{{ ui.page.title }}</span>
+      <span v-if="ui.page.eyebrow" class="top__eyebrow">{{ ui.page.eyebrow }}</span>
+    </h1>
 
     <span class="top__space" />
 
@@ -114,9 +125,65 @@
   backdrop-filter: blur(8px);
 }
 
+.top__start {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  /* the bar's padding plus this plus the gap = the sidebar's width plus the list's padding */
+  width: calc(var(--sidebar) - 6px);
+  min-width: 0;
+}
+
 .top__menu {
   display: none;
   margin-left: -6px;
+}
+
+.top__title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+
+.top__page {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top__page::first-letter {
+  text-transform: uppercase;
+}
+
+.top__eyebrow {
+  overflow: hidden;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+}
+
+.top__dot {
+  flex: none;
+  align-self: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.top__icon {
+  flex: none;
+  align-self: center;
+  width: 16px;
+  height: 16px;
+  color: var(--text-2);
 }
 
 .top__brand {
@@ -204,11 +271,18 @@
   .top__menu {
     display: inline-flex;
   }
+
+  /* no sidebar beside the list – the title right after the brand */
+  .top__start {
+    width: auto;
+    margin-right: 6px;
+  }
 }
 
 @media (max-width: 560px) {
   .top__label,
-  .top__version {
+  .top__version,
+  .top__eyebrow {
     display: none;
   }
 }

@@ -1,15 +1,7 @@
 <template>
+  <!-- the title goes up to the top bar; here the line under it and the page's actions – nothing at all when neither -->
   <header class="head">
     <div class="head__titles">
-      <div v-if="eyebrow" class="eyebrow">{{ eyebrow }}</div>
-
-      <h1 class="head__title">
-        <span v-if="color" class="head__dot" :style="{ background: color }" />
-        <component :is="icon" v-else-if="icon" class="head__icon" />
-        {{ title }}
-        <slot name="title-append" />
-      </h1>
-
       <p v-if="subtitle" class="head__sub">{{ subtitle }}</p>
     </div>
 
@@ -21,8 +13,10 @@
 
 <script lang="ts" setup>
   import type { Component } from 'vue'
+  import { markRaw, onBeforeUnmount, watchEffect } from 'vue'
+  import { useUiStore } from '@/stores/ui'
 
-  defineProps<{
+  const props = defineProps<{
     title: string
     eyebrow?: string
     subtitle?: string
@@ -31,15 +25,31 @@
     /** category icon */
     icon?: Component
   }>()
+
+  const ui = useUiStore()
+
+  // the title, the day (eyebrow) and the project's colour or category's icon – on the top bar
+  watchEffect(() => {
+    ui.page = { title: props.title, eyebrow: props.eyebrow, color: props.color, icon: props.icon ? markRaw(props.icon) : undefined }
+  })
+
+  onBeforeUnmount(() => {
+    ui.page = null
+  })
 </script>
 
 <style scoped>
 .head {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   flex-wrap: wrap;
   gap: 12px 16px;
-  padding: var(--edge) 0 20px;
+  padding: var(--edge) 0 16px;
+}
+
+/* nothing under the title and no actions (the plan): only the space above what follows */
+.head:not(:has(.head__sub)):has(.head__actions:empty) {
+  padding-bottom: 0;
 }
 
 /* actions wrap under the title when there's no room beside it */
@@ -48,36 +58,8 @@
   min-width: 0;
 }
 
-.head__title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 26px;
-  font-weight: 650;
-  line-height: 1.2;
-  letter-spacing: -.025em;
-}
-
-.head__title::first-letter {
-  text-transform: uppercase;
-}
-
-.head__icon {
-  flex: none;
-  width: 22px;
-  height: 22px;
-  color: var(--text-2);
-}
-
-.head__dot {
-  flex: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 4px;
-}
-
 .head__sub {
-  margin-top: 4px;
+  margin: 0;
   color: var(--text-2);
 }
 
