@@ -1,5 +1,5 @@
 <template>
-  <div class="page" :class="{ 'page--list': layout === 'list' }">
+  <div class="page">
     <PageHeader
       :color="project?.color"
       :eyebrow="eyebrow"
@@ -493,11 +493,6 @@
   font-weight: 500;
   letter-spacing: .06em;
   text-transform: uppercase;
-}
-
-/* a list reads better not too wide – the day stays near the title on a wide screen */
-.page--list {
-  max-width: 1100px;
 }
 
 .done-toggle {

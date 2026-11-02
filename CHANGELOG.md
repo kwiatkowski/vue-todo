@@ -18,7 +18,7 @@ Aplikacja pokazuje najnowszą sekcję w oknie „Co nowego” (klik w wersję na
 - Klik w priorytet na liście otwiera wybór priorytetu (jak status i projekt).
 - Dymki w stylu listy projektów – przy komentarzach („3 komentarze – kliknij, aby otworzyć”) i przyciskach menu, zamiast systemowych.
 - Czytelniej: jaśniejszy (w jasnym motywie ciemniejszy) szary tekst, większe pole kliknięcia kółka statusu i etykiet, dymki przy liczbach w panelu, większe drobne teksty w kalendarzu.
-- Spokojniejsza lista: tytuły zadań w toku bez pogrubienia, lista do 1100 px szerokości, kategoria przy grupie zawsze wersalikami.
+- Spokojniejsza lista: tytuły zadań w toku bez pogrubienia, kategoria przy grupie zawsze wersalikami.
 
 ## 2026.10.30
 
