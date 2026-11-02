@@ -20,6 +20,7 @@ Aplikacja pokazuje najnowszą sekcję w oknie „Co nowego” (klik w wersję na
 - Czytelniej: jaśniejszy (w jasnym motywie ciemniejszy) szary tekst, większe pole kliknięcia kółka statusu i etykiet, dymki przy liczbach w panelu, większe drobne teksty w kalendarzu.
 - Spokojniejsza lista: tytuły zadań w toku bez pogrubienia, kategoria przy grupie zawsze wersalikami.
 - Karta „Zadania” w Home Assistant: zadania na dziś z Todo; klik w zadanie otwiera je w Todo, „+” – nowe zadanie.
+- Design system „Atrament” spisany (DESIGN.md); w jasnym motywie czytelniejszy kolor ostrzeżeń i priorytetu średniego.
 
 ## 2026.10.30
 

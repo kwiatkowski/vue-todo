@@ -1,6 +1,6 @@
 # vue-todo
 
-Osobista aplikacja Todo z podziałem na kategorie i projekty – Vue 3 + Pinia, własny styl „Atrament” (bez bibliotek UI).
+Osobista aplikacja Todo z podziałem na kategorie i projekty – Vue 3 + Pinia, własny styl „Atrament” (bez bibliotek UI; zasady w [DESIGN.md](DESIGN.md)).
 Dane i logowanie zapewnia WordPress z pluginem [wp-plugin-todo](https://github.com/kwiatkowski/wp-plugin-todo).
 
 ## Jak to działa
