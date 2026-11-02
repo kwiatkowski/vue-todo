@@ -27,7 +27,7 @@
 
           <span v-if="titleError" class="error-text">Zadanie musi mieć tytuł.</span>
 
-          <NotesEditor v-model="form.notes" class="notes" :max-length="5000" placeholder="Notatki" />
+          <NotesEditor v-model="form.notes" class="notes" label="Opis zadania" :max-length="5000" />
         </div>
 
         <div class="props">

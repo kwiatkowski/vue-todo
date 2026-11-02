@@ -29,7 +29,7 @@
             class="input compose__field"
             maxlength="5000"
             placeholder="Napisz komentarz…"
-            rows="3"
+            rows="5"
             @keydown.enter.ctrl.prevent.stop="addComment"
             @keydown.enter.meta.prevent.stop="addComment"
           />
@@ -295,7 +295,8 @@ p {
 }
 
 .compose__field {
-  min-height: 72px;
+  /* five lines – two more than a textarea's usual three */
+  min-height: 112px;
   font-size: 13px;
 }
 

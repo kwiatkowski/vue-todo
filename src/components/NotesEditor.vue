@@ -1,6 +1,9 @@
 <template>
   <div class="notes" :class="{ 'notes--focus': focused }">
-    <div v-if="editor" aria-label="Formatowanie" class="notes__bar" role="toolbar">
+    <!-- with a label: the label until the editor is in use, then the tools in its place – the bar keeps its height -->
+    <div v-if="editor && label && !focused" class="notes__bar notes__label" @click="editor.commands.focus('end')">{{ label }}</div>
+
+    <div v-else-if="editor" aria-label="Formatowanie" class="notes__bar" role="toolbar">
       <button
         v-for="tool in TOOLS"
         :key="tool.name"
@@ -37,7 +40,7 @@
    * Markdown shortcuts work as you type: "- ", "1. ", "[ ] ", **bold**, ~~strike~~.
    */
 
-  const props = defineProps<{ placeholder?: string, maxLength?: number }>()
+  const props = defineProps<{ placeholder?: string, maxLength?: number, label?: string }>()
   const model = defineModel<string>({ required: true })
 
   interface Tool {
@@ -111,6 +114,16 @@
   gap: 2px;
   padding: 4px;
   border-bottom: 1px solid var(--line);
+}
+
+.notes__label {
+  align-items: center;
+  padding: 4px 10px;
+  /* a line as tall as a tool – the bar is as high with the label as with the tools */
+  line-height: 28px;
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: text;
 }
 
 .notes__tool {
