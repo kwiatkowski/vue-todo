@@ -14,6 +14,7 @@ Aplikacja pokazuje najnowszą sekcję w oknie „Co nowego” (klik w wersję na
 - Okno „Co nowego” z podsumowaniem zmian dnia – samo po nowej wersji, ręcznie z wersji na górnej belce.
 - Tytuł strony (Plan, projekt, kategoria) na górnej belce, nad początkiem listy – więcej miejsca na zadania.
 - Liczby przy zakładkach (Dziś, Jutro, tygodnie, Komentarze) w jednym stylu – zielony znaczek, czerwony przy zaległych.
+- Na liście etykiety w kolumnach: status, priorytet oraz notatki i komentarze zawsze w tym samym miejscu, tuż przed terminem.
 
 ## 2026.10.30
 

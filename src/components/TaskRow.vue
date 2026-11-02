@@ -40,12 +40,25 @@
         <TaskProjectPicker v-if="editable && showProject" class="row__project" :task="task" />
       </div>
 
-      <TaskMeta :due-aside="editable" :show-due="showDue" :show-project="showProject && !editable" :task="task" />
+      <TaskMeta v-if="!editable" :show-due="showDue" :show-project="showProject" :task="task" />
     </div>
 
-    <div v-if="editable && due" class="row__due" :class="dueClass">
-      <div class="row__due-day">{{ due.day }}</div>
-      <div v-if="due.detail" class="row__due-detail">{{ due.detail }}</div>
+    <!-- a list's row: the chips and the day as columns of fixed width – the same places in every row -->
+    <TaskMeta
+      v-if="editable"
+      class="row__meta"
+      columns
+      due-aside
+      :show-due="showDue"
+      :show-project="false"
+      :task="task"
+    />
+
+    <div v-if="editable" class="row__due" :class="dueClass">
+      <template v-if="due">
+        <div class="row__due-day">{{ due.day }}</div>
+        <div v-if="due.detail" class="row__due-detail">{{ due.detail }}</div>
+      </template>
     </div>
 
     <TaskMenu class="row__menu" :task="task" />
@@ -214,10 +227,33 @@
   justify-content: flex-end;
   gap: 6px;
   flex: none;
-  min-width: 84px;
+  /* the longest span, "28 paź – 30 lis · dzień 12 z 34" – a fixed width keeps the chips' column in place */
+  width: 196px;
   padding-top: 2px;
   text-align: right;
   line-height: 1.3;
+}
+
+.row__meta {
+  flex: none;
+  padding-top: 1px;
+}
+
+/* narrower: no room for columns – the chips and the day take what they need */
+@media (max-width: 900px) {
+  .row__due {
+    width: auto;
+    min-width: 84px;
+  }
+
+  .row__meta :deep(.meta__slot) {
+    display: contents;
+  }
+
+  .row__meta.meta--columns {
+    display: flex;
+    gap: 4px 6px;
+  }
 }
 
 .row__due-detail::before {
