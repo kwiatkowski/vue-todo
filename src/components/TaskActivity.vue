@@ -167,12 +167,12 @@
   const EVENT_TITLES: Record<TaskEvent['type'], string> = { created: 'Utworzone', changed: 'Zmiana', commented: 'Komentarz', commentEdited: 'Edycja komentarza' }
 
   const TABS: Array<{ key: Tab, label: string, icon: Component }> = [
-    { key: 'comments', label: 'Komentarze', icon: MessageSquare },
     { key: 'history', label: 'Historia', icon: History },
+    { key: 'comments', label: 'Komentarze', icon: MessageSquare },
   ]
 
   const notify = useNotifyStore()
-  const tab = ref<Tab>('comments')
+  const tab = ref<Tab>('history')
   const activity = ref<TaskActivity | null>(null)
   const loading = ref(false)
   const draft = ref('')
@@ -213,13 +213,13 @@
     }
   }
 
-  // each task opens on its comments, fresh from the server
+  // each task opens on its history, fresh from the server
   watch(() => props.task?.id, () => {
     activity.value = null
     draft.value = ''
     removing.value = null
     editing.value = null
-    tab.value = 'comments'
+    tab.value = 'history'
     void load()
   }, { immediate: true })
 
