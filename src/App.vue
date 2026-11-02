@@ -14,6 +14,7 @@
     <AreaDialog />
     <CopyDialog />
     <RemoveTaskDialog />
+    <ChangelogDialog />
     <ToastHost />
   </div>
 </template>
@@ -24,6 +25,7 @@
   import AppSidebar from '@/components/AppSidebar.vue'
   import AppTopbar from '@/components/AppTopbar.vue'
   import AreaDialog from '@/components/AreaDialog.vue'
+  import ChangelogDialog from '@/components/ChangelogDialog.vue'
   import CopyDialog from '@/components/CopyDialog.vue'
   import ProjectDialog from '@/components/ProjectDialog.vue'
   import RemoveTaskDialog from '@/components/RemoveTaskDialog.vue'

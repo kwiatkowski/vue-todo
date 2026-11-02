@@ -10,8 +10,16 @@
       <span class="top__site">Todo</span>
     </RouterLink>
 
-    <!-- the plugin's version (RRRR.MM.DD[.N]) – which build of the app this is -->
-    <span v-if="config.version" class="top__version mono">{{ config.version }}</span>
+    <!-- the plugin's version (RRRR.MM.DD[.N]) – which build of the app this is; a click shows what's new -->
+    <button
+      v-if="config.version"
+      class="top__version mono"
+      title="Co nowego"
+      type="button"
+      @click="ui.changelog = true"
+    >
+      {{ config.version }}
+    </button>
 
     <span class="top__space" />
 
@@ -67,6 +75,10 @@
         <LayoutDashboard /> Panel WordPressa
       </a>
 
+      <button class="menu__item" role="menuitem" type="button" @click="ui.changelog = true">
+        <Sparkles /> Co nowego
+      </button>
+
       <div class="menu__sep" />
 
       <a v-if="config.logoutUrl" class="menu__item" :href="config.logoutUrl" role="menuitem">
@@ -77,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { Check, ChevronDown, Layers, LayoutDashboard, LogOut, Menu, Moon, Plus, Sun } from 'lucide-vue-next'
+  import { Check, ChevronDown, Layers, LayoutDashboard, LogOut, Menu, Moon, Plus, Sparkles, Sun } from 'lucide-vue-next'
   import DropMenu from '@/components/ui/DropMenu.vue'
   import { useTheme } from '@/composables/theme'
   import { config } from '@/config'
@@ -140,10 +152,20 @@
 }
 
 .top__version {
-  margin-left: 2px;
+  margin-left: -2px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
   color: var(--text-3);
   font-size: 11px;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.top__version:hover {
+  background: var(--hover);
+  color: var(--text);
 }
 
 .top__space {
